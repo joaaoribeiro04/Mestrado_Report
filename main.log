@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.5) (preloaded format=pdflatex 2026.10.6)  3 NOV 2026 16:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.5) (preloaded format=pdflatex 2026.10.6)  3 NOV 2026 16:25
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1032,40 +1032,40 @@ File: images/Task_Model_3_Cliente_horizontal.png Graphic file (type png)
 Package pdftex.def Info: images/Task_Model_3_Cliente_horizontal.png  used on input line 75.
 (pdftex.def)             Requested size: 455.24411pt x 30.9744pt.
  [9 <./images/Task_Model_Cliente.png> <./images/Task_Model_3_Cliente_horizontal.png (PNG copy)>] [10]
-<images/arquitetura.png, id=538, 1525.7pt x 1405.25pt>
-File: images/arquitetura.png Graphic file (type png)
-<use images/arquitetura.png>
-Package pdftex.def Info: images/arquitetura.png  used on input line 163.
-(pdftex.def)             Requested size: 455.24411pt x 419.30536pt.
+<images/Arquitetura.png, id=538, 2348.775pt x 1473.25406pt>
+File: images/Arquitetura.png Graphic file (type png)
+<use images/Arquitetura.png>
+Package pdftex.def Info: images/Arquitetura.png  used on input line 163.
+(pdftex.def)             Requested size: 455.24411pt x 285.54118pt.
  [11]
-<images/BPMN.png, id=554, 2570.1621pt x 504.4446pt>
+<images/BPMN.png, id=556, 2570.1621pt x 504.4446pt>
 File: images/BPMN.png Graphic file (type png)
 <use images/BPMN.png>
-Package pdftex.def Info: images/BPMN.png  used on input line 176.
+Package pdftex.def Info: images/BPMN.png  used on input line 178.
 (pdftex.def)             Requested size: 455.24411pt x 89.34903pt.
- [12 <./images/arquitetura.png>]
-Overfull \hbox (17.62482pt too wide) in paragraph at lines 211--212
+ [12 <./images/Arquitetura.png>]
+Overfull \hbox (17.62482pt too wide) in paragraph at lines 213--214
 [][] 
  []
 
 
-Overfull \hbox (17.62482pt too wide) in paragraph at lines 239--240
+Overfull \hbox (17.62482pt too wide) in paragraph at lines 241--242
 [][] 
  []
 
 [13 <./images/BPMN.png>]
-Overfull \hbox (17.62482pt too wide) in paragraph at lines 267--268
+Overfull \hbox (17.62482pt too wide) in paragraph at lines 269--270
 [][] 
  []
 
 [14]
-Overfull \hbox (17.62482pt too wide) in paragraph at lines 295--296
+Overfull \hbox (17.62482pt too wide) in paragraph at lines 297--298
 [][] 
  []
 
 [15]) (chap3.tex [16]
 Cap\'{\i }tulo 3.
-<images/admin_principal.jpg, id=587, 1606.0pt x 586.19pt>
+<images/admin_principal.jpg, id=592, 1606.0pt x 586.19pt>
 File: images/admin_principal.jpg Graphic file (type jpg)
 <use images/admin_principal.jpg>
 Package pdftex.def Info: images/admin_principal.jpg  used on input line 29.
@@ -1073,35 +1073,35 @@ Package pdftex.def Info: images/admin_principal.jpg  used on input line 29.
 [17
 
 ]
-<images/admin_secundario.jpg, id=593, 1606.0pt x 813.0375pt>
+<images/admin_secundario.jpg, id=598, 1606.0pt x 813.0375pt>
 File: images/admin_secundario.jpg Graphic file (type jpg)
 <use images/admin_secundario.jpg>
 Package pdftex.def Info: images/admin_secundario.jpg  used on input line 41.
 (pdftex.def)             Requested size: 455.24411pt x 230.46509pt.
-<images/gestor_principal.jpg, id=594, 1606.0pt x 813.0375pt>
+<images/gestor_principal.jpg, id=599, 1606.0pt x 813.0375pt>
 File: images/gestor_principal.jpg Graphic file (type jpg)
 <use images/gestor_principal.jpg>
 Package pdftex.def Info: images/gestor_principal.jpg  used on input line 53.
 (pdftex.def)             Requested size: 455.24411pt x 230.46509pt.
  [18 <./images/admin_principal.jpg> <./images/admin_secundario.jpg>]
-<images/gestor_secundario.jpg, id=600, 1606.0pt x 1006.76125pt>
+<images/gestor_secundario.jpg, id=605, 1606.0pt x 1006.76125pt>
 File: images/gestor_secundario.jpg Graphic file (type jpg)
 <use images/gestor_secundario.jpg>
 Package pdftex.def Info: images/gestor_secundario.jpg  used on input line 65.
 (pdftex.def)             Requested size: 455.24411pt x 285.37839pt.
  [19 <./images/gestor_principal.jpg> <./images/gestor_secundario.jpg>]
-<images/cliente_principal.jpg, id=605, 1606.0pt x 586.19pt>
+<images/cliente_principal.jpg, id=610, 1606.0pt x 586.19pt>
 File: images/cliente_principal.jpg Graphic file (type jpg)
 <use images/cliente_principal.jpg>
 Package pdftex.def Info: images/cliente_principal.jpg  used on input line 77.
 (pdftex.def)             Requested size: 455.24411pt x 166.16249pt.
-<images/cliente_secundario.jpg, id=606, 1606.0pt x 1006.76125pt>
+<images/cliente_secundario.jpg, id=611, 1606.0pt x 1006.76125pt>
 File: images/cliente_secundario.jpg Graphic file (type jpg)
 <use images/cliente_secundario.jpg>
 Package pdftex.def Info: images/cliente_secundario.jpg  used on input line 88.
 (pdftex.def)             Requested size: 455.24411pt x 285.37839pt.
  [20 <./images/cliente_principal.jpg>]
-<images/video_foto.png, id=612, 1444.64719pt x 812.28468pt>
+<images/video_foto.png, id=617, 1444.64719pt x 812.28468pt>
 File: images/video_foto.png Graphic file (type png)
 <use images/video_foto.png>
 Package pdftex.def Info: images/video_foto.png  used on input line 99.
@@ -1223,17 +1223,17 @@ Package logreq Info: Writing requests to 'main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 30703 strings out of 467392
- 587281 string characters out of 5405639
- 1490844 words of memory out of 5000000
- 59518 multiletter control sequences out of 15000+600000
+ 30707 strings out of 467392
+ 587421 string characters out of 5405639
+ 1490895 words of memory out of 5000000
+ 59521 multiletter control sequences out of 15000+600000
  647103 words of font info for 77 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  92i,12n,93p,2591b,3296s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1095.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1095.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm0800.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1200.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1095.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbi1440.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbi1200.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1728.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecsl1200.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1200.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1200.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx2488.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\eccc1200.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1440.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1200.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1095.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1095.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1440.pk> <C:\Users\JPMR0\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm2074.pk><C:/Users/JPMR0/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/JPMR0/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
-Output written on main.pdf (46 pages, 2931870 bytes).
+Output written on main.pdf (46 pages, 3057365 bytes).
 PDF statistics:
- 1665 PDF objects out of 1728 (max. 8388607)
- 173 named destinations out of 1000 (max. 500000)
+ 1673 PDF objects out of 1728 (max. 8388607)
+ 174 named destinations out of 1000 (max. 500000)
  661 words of extra memory for PDF output out of 10000 (max. 10000000)
 

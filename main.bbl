@@ -464,6 +464,68 @@
       \verb https://www.postgresql.org/docs/17/
       \endverb
     \endentry
+    \entry{mailtrap}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=38340ca9a2666abc345a518b80070c79}{%
+           family={{Mailtrap}},
+           familyi={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{38340ca9a2666abc345a518b80070c79}
+      \strng{fullhash}{38340ca9a2666abc345a518b80070c79}
+      \strng{fullhashraw}{38340ca9a2666abc345a518b80070c79}
+      \strng{bibnamehash}{38340ca9a2666abc345a518b80070c79}
+      \strng{authorbibnamehash}{38340ca9a2666abc345a518b80070c79}
+      \strng{authornamehash}{38340ca9a2666abc345a518b80070c79}
+      \strng{authorfullhash}{38340ca9a2666abc345a518b80070c79}
+      \strng{authorfullhashraw}{38340ca9a2666abc345a518b80070c79}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Mailtrap Documentation}
+      \field{urlday}{3}
+      \field{urlmonth}{11}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://docs.mailtrap.io/
+      \endverb
+      \verb{url}
+      \verb https://docs.mailtrap.io/
+      \endverb
+    \endentry
+    \entry{mailkit}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=ac2edef6db369d70711ceedad65acb1a}{%
+           family={Stedfast},
+           familyi={S\bibinitperiod},
+           given={Jeffrey},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{ac2edef6db369d70711ceedad65acb1a}
+      \strng{fullhash}{ac2edef6db369d70711ceedad65acb1a}
+      \strng{fullhashraw}{ac2edef6db369d70711ceedad65acb1a}
+      \strng{bibnamehash}{ac2edef6db369d70711ceedad65acb1a}
+      \strng{authorbibnamehash}{ac2edef6db369d70711ceedad65acb1a}
+      \strng{authornamehash}{ac2edef6db369d70711ceedad65acb1a}
+      \strng{authorfullhash}{ac2edef6db369d70711ceedad65acb1a}
+      \strng{authorfullhashraw}{ac2edef6db369d70711ceedad65acb1a}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{MailKit: A cross-platform .NET mail-client library}
+      \field{urlday}{3}
+      \field{urlmonth}{11}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://github.com/jstedfast/MailKit
+      \endverb
+      \verb{url}
+      \verb https://github.com/jstedfast/MailKit
+      \endverb
+    \endentry
     \entry{bpmn}{report}{}{}
       \name{author}{1}{}{%
         {{hash=4d6b6fbad838f7618c462458711482fa}{%
@@ -554,36 +616,6 @@
       \endverb
       \verb{url}
       \verb https://masstransit.io
-      \endverb
-    \endentry
-    \entry{mailtrap}{online}{}{}
-      \name{author}{1}{}{%
-        {{hash=38340ca9a2666abc345a518b80070c79}{%
-           family={{Mailtrap}},
-           familyi={M\bibinitperiod}}}%
-      }
-      \strng{namehash}{38340ca9a2666abc345a518b80070c79}
-      \strng{fullhash}{38340ca9a2666abc345a518b80070c79}
-      \strng{fullhashraw}{38340ca9a2666abc345a518b80070c79}
-      \strng{bibnamehash}{38340ca9a2666abc345a518b80070c79}
-      \strng{authorbibnamehash}{38340ca9a2666abc345a518b80070c79}
-      \strng{authornamehash}{38340ca9a2666abc345a518b80070c79}
-      \strng{authorfullhash}{38340ca9a2666abc345a518b80070c79}
-      \strng{authorfullhashraw}{38340ca9a2666abc345a518b80070c79}
-      \field{sortinit}{2}
-      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{title}{Mailtrap Documentation}
-      \field{urlday}{3}
-      \field{urlmonth}{11}
-      \field{urlyear}{2026}
-      \field{urldateera}{ce}
-      \verb{urlraw}
-      \verb https://docs.mailtrap.io/
-      \endverb
-      \verb{url}
-      \verb https://docs.mailtrap.io/
       \endverb
     \endentry
     \entry{efcore}{online}{}{}

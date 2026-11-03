@@ -160,13 +160,15 @@ A arquitetura técnica do sistema apresenta a organização dos principais compo
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\linewidth]{images/arquitetura.png}
+    \includegraphics[width=1.0\linewidth]{images/Arquitetura.png}
     \caption{Arquitetura Técnica do Sistema}
     \label{fig:10}
 \end{figure}
 
 O \textit{gateway} é o único ponto exposto: valida o \textit{JWT} e encaminha cada pedido para o microsserviço certo. Cada serviço tem a sua base de dados no mesmo PostgreSQL~\cite{postgresql}. Reservas e Fila de espera publicam eventos no \textit{RabbitMQ}~\cite{rabbitmq}, e o serviço de Notificações consome-os para avisar o cliente.
 
+
+O serviço de Notificações envia os emails através da API da sandbox do Mailtrap~\cite{mailtrap}, por HTTPS. Em alternativa, pode usar qualquer servidor SMTP, através da biblioteca MailKit~\cite{mailkit}. Sem nenhum dos dois configurado, as mensagens ficam apenas registadas no log, o que permite desenvolver e testar sem enviar emails.
 \section{BPMN}
 
 O diagrama BPMN~\cite{bpmn} representa o fluxo dos principais processos do sistema GrabATable, permitindo visualizar de forma estruturada as atividades realizadas pelos diferentes intervenientes. Através deste modelo, é possível compreender a sequência das tarefas, as decisões e interações entre os diferentes participantes, proporcionando uma visão global do funcionamento dos processos da plataforma.
