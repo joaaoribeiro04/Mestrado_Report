@@ -1,0 +1,89 @@
+\documentclass[a4paper,12pt,oneside]{book}
+\usepackage{lesi/lesi}
+\usepackage[backend=biber, style=numeric, sorting=none]{biblatex}
+\addbibresource{referencias.bib}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage[table]{xcolor}
+\usepackage{array}
+\usepackage{ragged2e}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{xcolor}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\title{GrabATable}
+\subtitle{Desenvolvimento de Interfaces Aplicacionais}
+\author{Edgar Baptista, André Costa, João Ribeiro - Grupo 3}
+\nrAluno{16447, 21087, 23795}
+\regimePosLaboral
+%\regimeDiurno          ou \regimePosLaboral
+\LESI
+\date{2026/2027}
+
+%% Caso tenham mais que um orientador, colocar
+%% \orientador{Nome professor \AND Nome professor}
+\orientador{Marisa Pinheiro}
+
+\dataEntrega{\textbf{Data de entrega:} 3 novembro}
+
+%% comentar estas três linhas para projectos
+%\empresa{The Great Team}
+%\enderecoEmpresa{Braga, Portugal}
+%\supervisor{Eng. A. U. Thor}
+
+% comentar se não for para usar glossários
+%\makeglossaries
+
+
+
+\begin{document}
+\frontmatter
+\maketitle  % print the title
+
+
+
+%% Comment the following part if you are not acknowledging anybody
+%\begin{agradecimentos}
+%[A secção de agradecimentos é a parte pessoal do documento, e o único sítio onde o aluno pode escrever de forma menos formal, usando o tipo de linguagem que lhe parecer adequado para as pessoas a quem agradece.] 
+%\end{agradecimentos}
+
+
+\tableofcontents
+
+% comentar se nao tiver figuraIs
+\listoffigures
+
+% comentar se nao tiver tabelas
+\listoftables
+
+% comentar se nao se quiser lista de codigo
+%\lstlistoflistings
+
+% Commentar proximas duas linhas se nao for para usar acronimos
+
+% Commentar proximas duas linhas se nao for para usar glossarios
+%\input{glossario}
+%\printglossary
+
+ 
+\mainmatter
+
+\input{chap1}
+\input{chap2}
+\input{chap3}
+\input{chap4}
+\input{chap5}
+\input{chap6}
+\input{chap7}
+\input{chap8}
+
+%\bibliography{biblio}
+\printbibliography[heading=bibintoc, title={Bibliografia}]
+\end{document}  

@@ -1,0 +1,228 @@
+\chapter{Implementação da Arquitetura}
+\label{cap:implementacao}
+
+Este capítulo descreve a solução implementada a partir da análise do Capítulo~2: as
+tecnologias escolhidas, o API Gateway, cada um dos cinco microsserviços, a forma como
+comunicam entre si, as regras de negócio e a segurança.
+
+\section{Visão Geral e Tecnologias}
+
+A plataforma é composta por um API Gateway e cinco microsserviços, um por área de negócio,
+cada um com a sua própria base de dados (RNF06). Os serviços comunicam sobretudo por
+eventos assíncronos através de um \textit{broker} de mensagens; a única chamada síncrona entre
+serviços é a do serviço de reservas ao serviço de restaurantes, para obter os dados do
+restaurante no momento da reserva.
+
+\begin{verbatim}
+App (Cliente, Gestor, Administrador)
+  -> API Gateway (YARP, porta 8080: valida o JWT, limita pedidos, encaminha)
+       -> Auth           -> PostgreSQL: grabatable_auth
+       -> Restaurants    -> PostgreSQL: grabatable_restaurants
+       -> Reservations   -> PostgreSQL: grabatable_reservations (HTTP -> Restaurants)
+       -> Waitlist       -> PostgreSQL: grabatable_waitlist
+       -> Notifications  -> PostgreSQL: grabatable_notifications -> email (SMTP)
+  Serviços <-> RabbitMQ (MassTransit): eventos entre serviços
+  Gateway e serviços -> Jaeger (OpenTelemetry): rastreio de cada pedido
+\end{verbatim}
+
+\section{API Gateway}
+
+O gateway é o único componente exposto ao exterior (RNF03). As suas responsabilidades são:
+
+\begin{itemize}
+  \item \textbf{Encaminhamento:} cada prefixo de rota (\texttt{/api/auth}, \texttt{/api/restaurants},
+        \texttt{/api/reservations}, \texttt{/api/waitlist}, \texttt{/api/notifications}) é
+        encaminhado para o serviço correspondente, na rede interna do Docker;
+  \item \textbf{Autenticação:} o JWT é validado no gateway antes de o pedido chegar ao serviço.
+        As rotas públicas do Auth (registo, login, renovação do token e recuperação de
+        palavra-passe) são as únicas que não exigem token;
+  \item \textbf{Limite de pedidos:} as rotas públicas do Auth aceitam no máximo 10 pedidos por
+        minuto por endereço IP, para dificultar ataques de força bruta ao login;
+  \item \textbf{CORS:} só a origem do \textit{frontend} pode fazer pedidos a partir do browser;
+  \item \textbf{Tratamento de falhas:} quando um serviço está em baixo ou não responde, o gateway
+        devolve uma resposta clara;
+\end{itemize}
+
+O JWT é validado no gateway e outra vez em cada serviço, com a mesma chave. Assim, um serviço
+nunca confia apenas na rede: mesmo que um pedido chegasse sem passar pelo gateway, seria
+recusado sem um token válido.
+
+\section{Microsserviços}
+
+\subsection{Serviço de Autenticação (Auth)}
+
+\textbf{Responsabilidade:} contas de utilizador, autenticação, perfis e política de faltas.
+
+\begin{itemize}
+  \item \textbf{Registo e login:} só os clientes se registam; as contas de gestor são criadas pelo
+        administrador e associadas a um restaurante. O login devolve um \textit{access token}
+        de 15 minutos e um \textit{refresh token} de 7 dias;
+  \item \textbf{Tokens:} o \textit{refresh token} é aleatório (64 bytes) e só o seu \textit{hash}
+        SHA-256 é guardado. Cada renovação revoga o token anterior (rotação);
+  \item \textbf{Recuperação de palavra-passe:} a resposta é igual exista ou não o email, para não
+        revelar que contas existem; a ligação de recuperação é enviada pelo serviço de
+        notificações;
+  \item \textbf{Perfil:} consultar e alterar nome, email, telefone, palavra-passe e fotografia;
+  \item \textbf{Eliminação da conta (RGPD):} os dados pessoais são anonimizados e é publicado o
+        evento \texttt{UserDeleted}, para que os outros serviços anonimizem também os seus;
+  \item \textbf{Administração:} listar utilizadores, criar gestores, bloquear e desbloquear
+        clientes, e definir o limite de faltas (por defeito 3);
+  \item \textbf{Contagem de faltas:} consome \texttt{NoShowRegistered} (regra~4,
+        Secção~\ref{sec:regras}).
+\end{itemize}
+
+\textbf{Dados:} \texttt{users}, \texttt{refresh\_tokens}, \texttt{password\_reset\_tokens},
+\texttt{counted\_no\_shows} e \texttt{policies}. \textbf{Endpoints:} 17.
+
+\subsection{Serviço de Restaurantes (Restaurants)}
+
+\textbf{Responsabilidade:} restaurantes, mesas, turnos, estado das mesas, tempo médio de
+refeição e estatísticas de ocupação.
+
+\begin{itemize}
+  \item \textbf{Restaurantes:} pesquisa por texto, data e número de pessoas; detalhes com
+        horários, turnos e capacidades das mesas; criação, edição e desativação pelo administrador;
+  \item \textbf{Mesas:} criar, editar e remover mesas e capacidades (o gestor só no seu restaurante);
+  \item \textbf{Ocupação:} cada refeição fica registada em \texttt{table\_sessions} (hora em que o
+        grupo se sentou e em que a mesa foi libertada). Libertar uma mesa publica
+        \texttt{TableFreed};
+  \item \textbf{Tempo médio de refeição:} começa no valor por defeito (90 minutos) e passa a ser a
+        média real (regra~5), ou um valor fixo definido pelo gestor (modo manual);
+  \item \textbf{Estatísticas:} ocupação por dia e tempo médio real nos últimos $N$ dias;
+  \item \textbf{Cópia para a fila de espera:} sempre que o restaurante, as mesas ou o estado de uma
+        mesa mudam, publica \texttt{RestaurantSnapshotChanged}.
+\end{itemize}
+
+\textbf{Dados:} \texttt{restaurants} (horários e turnos em \texttt{jsonb}), \texttt{tables},
+\texttt{table\_sessions} e \texttt{policies}. \textbf{Endpoints:} 16.
+
+\subsection{Serviço de Reservas (Reservations)}
+
+\textbf{Responsabilidade:} reservas, disponibilidade, chegada, não comparência e relatórios.
+
+\begin{itemize}
+  \item \textbf{Disponibilidade:} para um dia e número de pessoas, devolve todas as horas dos
+        turnos, indicando as que estão esgotadas;
+  \item \textbf{Reservar:} valida o restaurante, o turno e o tamanho do grupo. Uma reserva repetida do mesmo cliente à mesma hora dá conflito; uma reserva cancelada não bloqueia uma nova reserva à mesma hora;
+  \item \textbf{Alterar e cancelar:} o cliente só vê e altera as suas reservas (as de outros
+        clientes respondem como inexistentes); o gestor pode cancelar as do seu restaurante;
+  \item \textbf{Reservas manuais:} o gestor regista clientes sem conta (nome e telefone);
+  \item \textbf{Chegada:} sugere a mesa livre mais pequena que serve o grupo e publica
+        \texttt{ReservationArrived}; a refeição fecha-se com \textit{complete};
+  \item \textbf{Não comparência:} publica \texttt{NoShowRegistered};
+  \item \textbf{Relatórios:} número de reservas e taxa de faltas por restaurante ou por região.
+\end{itemize}
+
+Os dados do restaurante (turnos, capacidades, tempo médio de refeição) são pedidos ao serviço
+de restaurantes por HTTP, reencaminhando o cabeçalho \texttt{Authorization} do pedido original.
+
+\textbf{Dados:} \texttt{reservations}, com o histórico de estados em \texttt{jsonb} e o nome do
+cliente (\texttt{customer\_name}) para o ecrã do gestor. \textbf{Endpoints:} 11.
+
+\subsection{Serviço de Fila de Espera (Waitlist)}
+
+\textbf{Responsabilidade:} fila de espera, tempo estimado e atribuição de mesas livres.
+
+\begin{itemize}
+  \item \textbf{Fila:} o cliente entra na fila, consulta a posição, o total de grupos e o tempo
+        estimado, e pode sair; o gestor consulta a fila do seu restaurante;
+  \item \textbf{Estimativa:} Cada grupo à frente ocupa a mesa adequada que fica livre mais cedo durante o tempo médio de refeição; o tempo do novo grupo é o da primeira mesa adequada a ficar livre (função EstimateMinutes).
+  \item \textbf{Tolerância:} um processo em segundo plano verifica a cada 30 segundos os grupos
+        chamados que não se apresentaram dentro da tolerância (15 minutos por defeito), passa-os
+        a \textit{Expired} e volta a oferecer a mesa;
+  \item \textbf{Gestão manual:} o gestor pode chamar o próximo grupo e marcá-lo como sentado.
+\end{itemize}
+
+\textbf{Dados:} \texttt{waitlist\_entries}, \texttt{restaurant\_snapshots} e
+\texttt{upcoming\_reservations}. \textbf{Endpoints:} 7.
+
+\subsection{Serviço de Notificações (Notifications)}
+
+\textbf{Responsabilidade:} envio de emails, registo e lista das notificações de cada utilizador.
+
+\begin{itemize}
+  \item \textbf{Consumidores:} reserva confirmada, alterada e cancelada; grupo chamado da fila;
+        pedido de revisão de bloqueio (enviado ao administrador); cliente bloqueado; recuperação
+        de palavra-passe; eliminação de conta (anonimiza o registo);
+  \item \textbf{Modelos:} sete modelos de mensagem em português, editáveis pelo administrador;
+  \item \textbf{Preferências:} cada utilizador pode desligar os avisos por email;
+  \item \textbf{Envio:} por SMTP com MailKit. Uma falha de SMTP não bloqueia o consumidor: a notificação fica registada como falhada.
+\end{itemize}
+
+\textbf{Dados:} \texttt{notification\_log}, \texttt{preferences} e \texttt{templates}.
+\textbf{Endpoints:} 4.
+
+\section{Comunicação entre Serviços}
+\label{sec:comunicacao}
+
+Cada serviço publica um evento depois de gravar a alteração na sua base de dados. Os eventos
+levam os dados de que os consumidores precisam (por exemplo o email do cliente), porque um
+serviço nunca acede à base de dados de outro.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Evento} & \textbf{Publicado por} & \textbf{Consumido por} \\
+\midrule
+\texttt{ReservationConfirmed} & Reservations & Notifications, Waitlist \\
+\texttt{ReservationChanged} & Reservations & Notifications, Waitlist \\
+\texttt{ReservationCancelled} & Reservations & Notifications, Waitlist \\
+\texttt{ReservationArrived} & Reservations & Restaurants, Waitlist \\
+\texttt{NoShowRegistered} & Reservations & Auth, Waitlist \\
+\texttt{TableFreed} & Restaurants & Waitlist \\
+\texttt{RestaurantSnapshotChanged} & Restaurants & Waitlist \\
+\texttt{WaitlistPromoted} & Waitlist & Notifications, Restaurants \\
+\texttt{BlockReviewRequested} & Auth & Notifications \\
+\texttt{UserBlocked} & Auth & Notifications \\
+\texttt{UserDeleted} & Auth & Reservations, Waitlist, Notifications \\
+\texttt{PasswordResetRequested} & Auth & Notifications \\
+\bottomrule
+\end{tabular}
+\caption{Eventos trocados entre serviços}
+\label{tab:eventos}
+\end{table}
+
+Como a mesma mensagem pode ser entregue mais de uma vez, \textbf{todos os consumidores são
+idempotentes}: processar duas vezes a mesma mensagem tem o mesmo efeito que processá-la uma
+vez (por exemplo, a falta é registada numa tabela cuja chave primária é o identificador da
+reserva, e cada notificação guarda o identificador da mensagem que lhe deu origem). Em caso de
+erro, cada consumidor tenta outra vez até três vezes, com intervalos de 5 segundos. Cada serviço
+tem as suas próprias filas no RabbitMQ (por exemplo \texttt{waitlist-table-freed} e
+\texttt{notifications-reservation-confirmed}), de modo que cada um recebe a sua cópia do evento.
+
+\section{Dados}
+
+Cada serviço tem a sua base de dados no mesmo servidor PostgreSQL e nunca acede à de outro; entre
+serviços só existem identificadores (\texttt{uuid}), nunca chaves estrangeiras. O esquema de cada
+serviço é versionado com \textit{migrations} do Entity Framework Core, aplicadas automaticamente
+quando o serviço arranca. As regras de integridade estão também na própria base de dados:
+restrições únicas (email do utilizador, nome da mesa por restaurante, reserva do mesmo cliente à
+mesma hora), restrições \texttt{CHECK} (capacidade e número de pessoas positivos) e índices
+parciais (por exemplo, só os grupos à espera). As datas são guardadas em UTC e os horários dos
+restaurantes em hora de Lisboa.
+
+\section{Segurança}
+
+\begin{itemize}
+  \item \textbf{Autenticação:} JWT assinado com HS256, validado no gateway e em cada serviço, com
+        os perfis Cliente, Gestor e Administrador. O token do gestor indica o seu restaurante;
+  \item \textbf{Autorização:} políticas por perfil e verificação ``gestor do próprio restaurante''
+        (um gestor que tenta alterar mesas ou reservas de outro restaurante recebe 403). Um
+        cliente que pede dados de outro cliente recebe 404, para não revelar que existem;
+  \item \textbf{Palavras-passe e tokens:} palavras-passe com BCrypt; \textit{refresh tokens} e
+        tokens de recuperação guardados apenas como \textit{hash};
+  \item \textbf{Respostas genéricas:} o login e a recuperação de palavra-passe não revelam que
+        emails existem; um cliente bloqueado recebe a mesma mensagem que credenciais erradas;
+  \item \textbf{Rede:} só o gateway publica uma porta; os serviços, o PostgreSQL e o RabbitMQ
+        ficam numa rede interna, com utilizador e palavra-passe;
+  \item \textbf{RGPD (RNF09):} consentimento guardado no registo; eliminar a conta anonimiza nome,
+        email e telefone em todos os serviços e mantém as reservas apenas para estatística.
+\end{itemize}
+
+\section{Documentação das APIs}
+
+Cada serviço documenta a sua API em OpenAPI (RNF06). Todos os \textit{endpoints} declaram as
+respostas possíveis, incluindo os erros (400, 401, 403, 404, 409, 422 e 503), e o esquema de
+autenticação Bearer. Os documentos são gerados automaticamente em cada compilação para a pasta
+\texttt{docs/openapi} (um ficheiro por serviço), sem ser preciso ter os serviços a correr.

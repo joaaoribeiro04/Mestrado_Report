@@ -1,0 +1,175 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{coolors}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=ac2c6de5e4a6d231ebe38ed4e78d470b}{%
+           family={{Coolors}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{ac2c6de5e4a6d231ebe38ed4e78d470b}
+      \strng{fullhash}{ac2c6de5e4a6d231ebe38ed4e78d470b}
+      \strng{fullhashraw}{ac2c6de5e4a6d231ebe38ed4e78d470b}
+      \strng{bibnamehash}{ac2c6de5e4a6d231ebe38ed4e78d470b}
+      \strng{authorbibnamehash}{ac2c6de5e4a6d231ebe38ed4e78d470b}
+      \strng{authornamehash}{ac2c6de5e4a6d231ebe38ed4e78d470b}
+      \strng{authorfullhash}{ac2c6de5e4a6d231ebe38ed4e78d470b}
+      \strng{authorfullhashraw}{ac2c6de5e4a6d231ebe38ed4e78d470b}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Coolors Palette Generator}
+      \field{urlday}{2}
+      \field{urlmonth}{11}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://coolors.co
+      \endverb
+      \verb{url}
+      \verb https://coolors.co
+      \endverb
+    \endentry
+    \entry{googlefonts}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=8b36e9207c24c76e6719268e49201d94}{%
+           family={{Google}},
+           familyi={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{fullhash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{fullhashraw}{8b36e9207c24c76e6719268e49201d94}
+      \strng{bibnamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorbibnamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authornamehash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorfullhash}{8b36e9207c24c76e6719268e49201d94}
+      \strng{authorfullhashraw}{8b36e9207c24c76e6719268e49201d94}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Google Fonts: Poppins e Inter}
+      \field{urlday}{2}
+      \field{urlmonth}{11}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://fonts.google.com
+      \endverb
+      \verb{url}
+      \verb https://fonts.google.com
+      \endverb
+    \endentry
+    \entry{wcag}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=446a1ae6601a5c59360c7d591c3992da}{%
+           family={{W3C}},
+           familyi={W\bibinitperiod}}}%
+      }
+      \strng{namehash}{446a1ae6601a5c59360c7d591c3992da}
+      \strng{fullhash}{446a1ae6601a5c59360c7d591c3992da}
+      \strng{fullhashraw}{446a1ae6601a5c59360c7d591c3992da}
+      \strng{bibnamehash}{446a1ae6601a5c59360c7d591c3992da}
+      \strng{authorbibnamehash}{446a1ae6601a5c59360c7d591c3992da}
+      \strng{authornamehash}{446a1ae6601a5c59360c7d591c3992da}
+      \strng{authorfullhash}{446a1ae6601a5c59360c7d591c3992da}
+      \strng{authorfullhashraw}{446a1ae6601a5c59360c7d591c3992da}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Web Content Accessibility Guidelines (WCAG) 2.1}
+      \field{urlday}{2}
+      \field{urlmonth}{11}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.w3.org/TR/WCAG21/
+      \endverb
+      \verb{url}
+      \verb https://www.w3.org/TR/WCAG21/
+      \endverb
+    \endentry
+    \entry{rabbitmq}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=93933c6ca68705cf2c6eee19987428b0}{%
+           family={{Broadcom}},
+           familyi={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{93933c6ca68705cf2c6eee19987428b0}
+      \strng{fullhash}{93933c6ca68705cf2c6eee19987428b0}
+      \strng{fullhashraw}{93933c6ca68705cf2c6eee19987428b0}
+      \strng{bibnamehash}{93933c6ca68705cf2c6eee19987428b0}
+      \strng{authorbibnamehash}{93933c6ca68705cf2c6eee19987428b0}
+      \strng{authornamehash}{93933c6ca68705cf2c6eee19987428b0}
+      \strng{authorfullhash}{93933c6ca68705cf2c6eee19987428b0}
+      \strng{authorfullhashraw}{93933c6ca68705cf2c6eee19987428b0}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{RabbitMQ Documentation}
+      \field{urlday}{2}
+      \field{urlmonth}{11}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.rabbitmq.com/docs
+      \endverb
+      \verb{url}
+      \verb https://www.rabbitmq.com/docs
+      \endverb
+    \endentry
+    \entry{figma}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=f8a42c0ddbbfddd84f5d3945bad7f8e9}{%
+           family={{Figma, Inc.}},
+           familyi={F\bibinitperiod}}}%
+      }
+      \strng{namehash}{f8a42c0ddbbfddd84f5d3945bad7f8e9}
+      \strng{fullhash}{f8a42c0ddbbfddd84f5d3945bad7f8e9}
+      \strng{fullhashraw}{f8a42c0ddbbfddd84f5d3945bad7f8e9}
+      \strng{bibnamehash}{f8a42c0ddbbfddd84f5d3945bad7f8e9}
+      \strng{authorbibnamehash}{f8a42c0ddbbfddd84f5d3945bad7f8e9}
+      \strng{authornamehash}{f8a42c0ddbbfddd84f5d3945bad7f8e9}
+      \strng{authorfullhash}{f8a42c0ddbbfddd84f5d3945bad7f8e9}
+      \strng{authorfullhashraw}{f8a42c0ddbbfddd84f5d3945bad7f8e9}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Figma Design Documentation}
+      \field{urlday}{2}
+      \field{urlmonth}{11}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://help.figma.com
+      \endverb
+      \verb{url}
+      \verb https://help.figma.com
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

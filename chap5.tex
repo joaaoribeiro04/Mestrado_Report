@@ -1,0 +1,137 @@
+\chapter{Resiliência e Observabilidade}
+\label{cap:resiliencia}
+
+Numa arquitetura de microsserviços, a falha de uma peça é uma situação normal e não uma
+exceção. Este capítulo descreve como a plataforma se comporta quando um serviço, uma
+dependência, a base de dados ou o \textit{broker} de mensagens falham, que respostas recebe a
+aplicação, e como se acompanha cada pedido de ponta a ponta.
+
+\section{Princípios}
+
+\begin{itemize}
+  \item \textbf{Isolamento:} cada serviço tem a sua base de dados e o seu processo; a falha de um
+        serviço não impede os outros de responder;
+  \item \textbf{Comunicação assíncrona:} os serviços avisam-se por eventos no RabbitMQ~\cite{rabbitmq}. Se o
+        consumidor estiver em baixo, o evento fica na fila e é processado quando o serviço
+        volta. É o que garante o RNF04: uma falha no serviço de notificações não impede a criação de reservas;
+  \item \textbf{Autenticação sem dependências:} o JWT é validado localmente no gateway e em cada
+        serviço; sem o serviço de autenticação deixa de ser possível iniciar sessão, mas os
+        tokens já emitidos continuam válidos;
+  \item \textbf{Falhar depressa e com clareza:} uma dependência em baixo dá uma resposta 503 com uma
+        mensagem que explica o que falhou, em vez de um erro genérico ou de um pedido pendurado.
+\end{itemize}
+
+\section{Respostas de Erro}
+
+Todas as respostas de erro seguem o formato \textit{Problem Details} (RFC 9457) e estão em
+português, incluindo as que o ASP.NET Core gera automaticamente (falta de token, validação dos
+campos, JSON mal formado). Cada resposta indica o serviço que produziu o erro (\texttt{service})
+e o identificador do pedido (\texttt{traceId}), que permite encontrá-lo nos registos e no
+Jaeger. Por exemplo, com o serviço de reservas parado:
+
+\begin{verbatim}
+HTTP/1.1 503 Service Unavailable
+X-Trace-Id: b289140cbcf9c7ea82409207641383cd
+{
+  "title": "Serviço indisponível",
+  "status": 503,
+  "detail": "O serviço de reservas está indisponível.",
+  "service": "reservations",
+  "traceId": "00-b289140cbcf9c7ea82409207641383cd-ed21d1c051186c8d-01"
+}
+\end{verbatim}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Código} & \textbf{Quando} \\
+\midrule
+400 & Dados inválidos, com a lista de erros por campo \\
+401 & Sem sessão iniciada: token em falta, inválido ou expirado \\
+403 & Perfil sem permissão, ou gestor a atuar noutro restaurante \\
+404 & Recurso inexistente (ou de outro cliente) \\
+409 & Conflito: reserva repetida, mesa já livre, sem mesas para a hora pedida \\
+422 & Pedido impossível: nenhuma mesa serve o grupo \\
+429 & Demasiados pedidos nas rotas públicas do Auth \\
+503 & Serviço, base de dados ou RabbitMQ indisponíveis \\
+504 & Um serviço não respondeu a tempo ao gateway \\
+\bottomrule
+\end{tabularx}
+\caption{Códigos de erro devolvidos à aplicação}
+\label{tab:codigos}
+\end{table}
+
+\section{Resiliência na Comunicação Síncrona}
+\label{sec:resiliencia-http}
+
+A chamada do serviço de reservas ao serviço de restaurantes é a única dependência síncrona entre
+serviços, e por isso é protegida com três mecanismos:
+
+\begin{itemize}
+  \item \textbf{Tempo limite:} cada tentativa tem no máximo 2 segundos (8 segundos no total);
+  \item \textbf{Novas tentativas:} até duas, para falhas transitórias;
+  \item Se pelo menos metade de quatro ou mais chamadas falhar num intervalo de 10 segundos, o circuito abre durante 15 segundos. Enquanto está aberto, os pedidos falham imediatamente, sem esperar por um serviço que se sabe estar em baixo, o que evita acumular pedidos pendurados e consumir recursos.
+\end{itemize}
+
+\section{Comportamento em Caso de Falhas}
+
+Os cenários seguintes foram executados no ambiente completo (Docker Compose), parando um
+container de cada vez. Estão automatizados numa \textit{collection} do Postman própria. Os tempos indicados foram medidos.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+\textbf{Peça parada} & \textbf{Resposta à aplicação} & \textbf{O que demonstra} \\
+\midrule
+Serviço de reservas &
+503 do gateway: ``O serviço de reservas está indisponível.'' Os restantes serviços continuam
+a responder normalmente. &
+Isolamento entre serviços; o gateway responde com clareza em vez de um 502 sem corpo. \\
+\midrule
+Serviço de autenticação &
+Login: 503. Pedidos com um token já emitido: 200. &
+O JWT é validado localmente: o sistema continua a funcionar para quem já tem sessão. \\
+\midrule
+Serviço de restaurantes &
+Reservar: 503 do serviço de reservas. 1.\textsuperscript{a} tentativa em cerca de 6,7~s
+(tentativas com tempo limite), 2.\textsuperscript{a} em cerca de 2~s, a partir da
+3.\textsuperscript{a} em menos de 20~ms. ``As minhas reservas'' continua a
+funcionar. &
+Tempo limite e novas tentativas; só falham as operações que dependem do serviço em
+baixo. \\
+\midrule
+Serviço de notificações &
+A reserva é criada (201). Ao voltar, o serviço processa o evento que ficou na fila e a
+notificação aparece. &
+Comunicação assíncrona e consistência eventual (RNF04). \\
+\midrule
+PostgreSQL &
+503: ``A base de dados do serviço de restaurantes está indisponível.'' &
+Falhas de infraestrutura distinguem-se de erros do pedido. \\
+\midrule
+RabbitMQ &
+Reservar: 503 ao fim de 5~s: ``a alteração foi gravada, mas os outros serviços não foram
+avisados''. Ao voltar, os serviços religam-se sozinhos em 20 a 40~s. &
+Limitação conhecida (Secção~\ref{sec:limitacoes}). \\
+\bottomrule
+\end{tabularx}
+\caption{Comportamento do sistema com cada peça parada}
+\label{tab:falhas}
+\end{table}
+
+\section{Limitações Conhecidas}
+\label{sec:limitacoes}
+
+Cada serviço grava a alteração na sua base de dados e só depois publica o evento. Se o RabbitMQ
+estiver em baixo nesse momento, a alteração fica gravada mas os outros serviços não são avisados:
+por exemplo, a reserva existe, mas a fila de espera e as notificações nunca recebem o evento de
+confirmação. O sistema deteta a situação e responde 503 ao fim de 5 segundos, em vez de deixar
+o pedido pendurado, mas a inconsistência mantém-se.
+
+A solução é o padrão \textit{transactional outbox}: o evento é gravado numa tabela da mesma base de
+dados, na mesma transação da alteração, e um processo em segundo plano publica-o quando o
+RabbitMQ estiver disponível. O MassTransit oferece esta funcionalidade para o Entity Framework
+Core; fica como trabalho futuro, porque exige tabelas novas nos cinco serviços.
