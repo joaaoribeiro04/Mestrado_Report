@@ -1,12 +1,12 @@
 # Fdb version 4
-["biber main"] 1793723064.03665 "main.bcf" "main.bbl" "main" 1793723112.93367 0
-  "main.bcf" 1793723112 112624 8c2c8d3415c10dacbe795d463a9eb036 "pdflatex"
+["biber main"] 1793724132.67205 "main.bcf" "main.bbl" "main" 1793724384.96886 0
+  "main.bcf" 1793724384 112684 660a5cb99d966b39464665201291c2d7 "pdflatex"
   "referencias.bib" 1793718640 8743 001b3dd6e837e148b38af3c098d18765 ""
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1793723108.98518 "c:/Users/JPMR0/Documents/Pessoal/Projetos/MEI_Report/main.tex" "main.pdf" "main" 1793723112.93425 0
+["pdflatex"] 1793724380.27712 "c:/Users/JPMR0/Documents/Pessoal/Projetos/MEI_Report/main.tex" "main.pdf" "main" 1793724384.96949 0
   "C:/Users/JPMR0/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1793700342 80909 eab91d9745dd2edfd62a31d53cd5fe15 ""
   "C:/Users/JPMR0/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/ecbi1200.pk" 1793700349 42728 76b52d4208d51ce737fe59278dcd8d1c ""
   "C:/Users/JPMR0/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/ecbi1440.pk" 1793700349 52860 f8aadf1cb811c38be1fe242d0b16e662 ""
@@ -178,7 +178,7 @@
   "C:/Users/JPMR0/AppData/Local/Programs/MiKTeX/tex/latex/xkeyval/xkeyval.sty" 1656236919 4937 4ce600ce9bd4ec84d0250eb6892fcf4f ""
   "c:/Users/JPMR0/Documents/Pessoal/Projetos/MEI_Report/main.tex" 1793722549 2116 fc40f2191d0905ea6efaf736bfbd82ee ""
   "chap1.tex" 1793718819 11789 3ce045c3f9960c766fde2da145d2a41b ""
-  "chap2.tex" 1793723108 18045 feebddaea33febc0e8633c7b66e2756c ""
+  "chap2.tex" 1793724375 18784 a61177987db0eed25348e79155f4b02a ""
   "chap3.tex" 1793721466 4739 bc6bb252823680259ea3a8139e514020 ""
   "chap4.tex" 1793722104 14473 2c7768dd04045350b2c55ed79ae7280a ""
   "chap5.tex" 1793722121 6722 0e2b658686f63d556318e6e4381e47ab ""
@@ -187,6 +187,7 @@
   "chap8.tex" 1793722343 5795 f6bc13f9462e1caae2ffe01605dae73c ""
   "images/Arquitetura.png" 1793722849 315001 891e7b29715d3222a35c7748bb62295b ""
   "images/BPMN.png" 1793700229 799462 d51a87bb15fe0920f6cd7a4a3e65c22d ""
+  "images/BPMN_v2.png" 1793723803 765610 be4e0c91f111a9982cc5906d0ff4c5e7 ""
   "images/Logo.png" 1793700229 190715 a826d7b79b406b10e04439a14238458e ""
   "images/Site_Map.png" 1793700229 89722 ead64eac97d00481974c356954dba088 ""
   "images/Task_Model_1_Administrador_horizontal.png" 1793700229 11012 b71c5074cd851529000344afb84bd1a5 ""
@@ -206,14 +207,14 @@
   "lesi/lesi.sty" 1793700229 3696 871402e389eae248045793f7c0265dd5 ""
   "lesi/logos/logo_est.png" 1793700229 90610 d9296195d8b1c122149f601a81915d4e ""
   "lesi/logos/logo_ipca.png" 1793700229 53986 7d62c92bbd3d38f634b0f8890d5164bb ""
-  "main.aux" 1793723112 26142 77ddec1dc951ba8f193503ecdec9d50d "pdflatex"
-  "main.bbl" 1793723065 32238 8ac5c9b258e58c13f5b227f7c6061228 "biber main"
-  "main.lof" 1793723112 2147 d08bdbd71f23f3b42baf275ee893192a "pdflatex"
-  "main.lot" 1793723112 1536 6c7e2ee75bddd691e996afa2dde65ea6 "pdflatex"
-  "main.out" 1793723112 11537 e70581235a2075e2dafc4828b1adfa7a "pdflatex"
-  "main.run.xml" 1793723112 2341 da8fb0ac168037a1f895a88ac26164f9 "pdflatex"
+  "main.aux" 1793724384 26533 49010b0d4d2d22a6b1a44c1624247057 "pdflatex"
+  "main.bbl" 1793724134 32238 ef1be42dca8c7fc91db317965b1e82bd "biber main"
+  "main.lof" 1793724384 2254 a01f2ac0041987287addc8637a513524 "pdflatex"
+  "main.lot" 1793724384 1536 df55e7bf26501ed1f9f6fc497c84e479 "pdflatex"
+  "main.out" 1793724384 11670 9328db35106b5bc7577dd356e9660704 "pdflatex"
+  "main.run.xml" 1793724384 2341 da8fb0ac168037a1f895a88ac26164f9 "pdflatex"
   "main.tex" 1793722549 2116 fc40f2191d0905ea6efaf736bfbd82ee ""
-  "main.toc" 1793723112 7158 3737b0a0e6937ee550e18d7b2f8bb453 "pdflatex"
+  "main.toc" 1793724384 7234 665f6984825580d145c9bb05970a5733 "pdflatex"
   (generated)
   "main.aux"
   "main.bcf"

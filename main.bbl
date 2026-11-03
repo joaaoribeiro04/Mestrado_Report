@@ -787,8 +787,8 @@
       \strng{authorfullhash}{e6f3d214228cc5933c1a82019f7dc0e0}
       \strng{authorfullhashraw}{e6f3d214228cc5933c1a82019f7dc0e0}
       \field{extraname}{2}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{title}{Docker Compose Documentation}

@@ -31,54 +31,55 @@
 \contentsline {subsection}{\numberline {2.3.2}Requisitos Não Funcionais}{10}{subsection.2.3.2}%
 \contentsline {section}{\numberline {2.4}Arquitetura Técnica do Sistema}{11}{section.2.4}%
 \contentsline {section}{\numberline {2.5}BPMN}{12}{section.2.5}%
-\contentsline {section}{\numberline {2.6}Personas}{13}{section.2.6}%
-\contentsline {subsection}{\numberline {2.6.1}Persona 1 -- Marta Silva (Cliente)}{13}{subsection.2.6.1}%
-\contentsline {subsection}{\numberline {2.6.2}Persona 2 -- Rui Fernandes (Cliente sem reserva)}{14}{subsection.2.6.2}%
-\contentsline {subsection}{\numberline {2.6.3}Persona 3 -- Teresa Almeida (Gestora)}{15}{subsection.2.6.3}%
-\contentsline {subsection}{\numberline {2.6.4}Persona 4 -- Pedro Machado (Administrador)}{15}{subsection.2.6.4}%
-\contentsline {section}{\numberline {2.7}Análise SWOT}{16}{section.2.7}%
-\contentsline {chapter}{\numberline {3}Protótipo Interativo}{17}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Acesso ao Protótipo}{17}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Fluxos de Interação}{17}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Administrador}{17}{subsection.3.2.1}%
-\contentsline {subsubsection}{Tarefa principal -- Adicionar um restaurante.}{17}{subsection.3.2.1}%
-\contentsline {subsubsection}{Tarefa secundária -- Rever e bloquear um cliente.}{18}{figure.caption.20}%
-\contentsline {subsection}{\numberline {3.2.2}Gestor}{18}{subsection.3.2.2}%
-\contentsline {subsubsection}{Tarefa principal -- Atender um cliente com reserva.}{18}{subsection.3.2.2}%
-\contentsline {subsubsection}{Tarefa secundária -- Libertar uma mesa.}{19}{figure.caption.22}%
-\contentsline {subsection}{\numberline {3.2.3}Cliente}{20}{subsection.3.2.3}%
-\contentsline {subsubsection}{Tarefa principal -- Reservar mesa para refeição.}{20}{subsection.3.2.3}%
-\contentsline {subsubsection}{Tarefa secundária -- Entrar na fila de espera.}{20}{figure.caption.24}%
-\contentsline {section}{\numberline {3.3}Vídeo de Demonstração}{21}{section.3.3}%
-\contentsline {chapter}{\numberline {4}Implementação da Arquitetura}{22}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Visão Geral e Tecnologias}{22}{section.4.1}%
-\contentsline {section}{\numberline {4.2}API Gateway}{22}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Microsserviços}{23}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Serviço de Autenticação (Auth)}{23}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}Serviço de Restaurantes (Restaurants)}{23}{subsection.4.3.2}%
-\contentsline {subsection}{\numberline {4.3.3}Serviço de Reservas (Reservations)}{24}{subsection.4.3.3}%
-\contentsline {subsection}{\numberline {4.3.4}Serviço de Fila de Espera (Waitlist)}{25}{subsection.4.3.4}%
-\contentsline {subsection}{\numberline {4.3.5}Serviço de Notificações (Notifications)}{25}{subsection.4.3.5}%
-\contentsline {section}{\numberline {4.4}Comunicação entre Serviços}{26}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Dados}{26}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Segurança}{27}{section.4.6}%
-\contentsline {section}{\numberline {4.7}Documentação das APIs}{27}{section.4.7}%
-\contentsline {chapter}{\numberline {5}Resiliência e Observabilidade}{28}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Princípios}{28}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Respostas de Erro}{28}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Resiliência na Comunicação Síncrona}{29}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Comportamento em Caso de Falhas}{29}{section.5.4}%
-\contentsline {section}{\numberline {5.5}Limitações Conhecidas}{30}{section.5.5}%
-\contentsline {chapter}{\numberline {6}Testes}{31}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Testes de Integração}{31}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Testes Obrigatórios}{31}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Resultados}{32}{section.6.3}%
-\contentsline {section}{\numberline {6.4}Testes de Sistema}{33}{section.6.4}%
-\contentsline {chapter}{\numberline {7}Containers -- Docker}{34}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Imagens}{34}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Ambiente com Docker Compose}{34}{section.7.2}%
-\contentsline {chapter}{\numberline {8}Conclusão e Trabalho Futuro}{35}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Requisitos Cumpridos}{35}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Conclusão}{36}{section.8.2}%
-\contentsline {section}{\numberline {8.3}Trabalho Futuro}{37}{section.8.3}%
-\contentsline {chapter}{Bibliografia}{38}{chapter*.32}%
+\contentsline {section}{\numberline {2.6}BPMN Atualizado}{13}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Personas}{14}{section.2.7}%
+\contentsline {subsection}{\numberline {2.7.1}Persona 1 -- Marta Silva (Cliente)}{14}{subsection.2.7.1}%
+\contentsline {subsection}{\numberline {2.7.2}Persona 2 -- Rui Fernandes (Cliente sem reserva)}{15}{subsection.2.7.2}%
+\contentsline {subsection}{\numberline {2.7.3}Persona 3 -- Teresa Almeida (Gestora)}{16}{subsection.2.7.3}%
+\contentsline {subsection}{\numberline {2.7.4}Persona 4 -- Pedro Machado (Administrador)}{16}{subsection.2.7.4}%
+\contentsline {section}{\numberline {2.8}Análise SWOT}{17}{section.2.8}%
+\contentsline {chapter}{\numberline {3}Protótipo Interativo}{18}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Acesso ao Protótipo}{18}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Fluxos de Interação}{18}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Administrador}{18}{subsection.3.2.1}%
+\contentsline {subsubsection}{Tarefa principal -- Adicionar um restaurante.}{18}{subsection.3.2.1}%
+\contentsline {subsubsection}{Tarefa secundária -- Rever e bloquear um cliente.}{19}{figure.caption.21}%
+\contentsline {subsection}{\numberline {3.2.2}Gestor}{19}{subsection.3.2.2}%
+\contentsline {subsubsection}{Tarefa principal -- Atender um cliente com reserva.}{19}{subsection.3.2.2}%
+\contentsline {subsubsection}{Tarefa secundária -- Libertar uma mesa.}{20}{figure.caption.23}%
+\contentsline {subsection}{\numberline {3.2.3}Cliente}{21}{subsection.3.2.3}%
+\contentsline {subsubsection}{Tarefa principal -- Reservar mesa para refeição.}{21}{subsection.3.2.3}%
+\contentsline {subsubsection}{Tarefa secundária -- Entrar na fila de espera.}{21}{figure.caption.25}%
+\contentsline {section}{\numberline {3.3}Vídeo de Demonstração}{22}{section.3.3}%
+\contentsline {chapter}{\numberline {4}Implementação da Arquitetura}{23}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Visão Geral e Tecnologias}{23}{section.4.1}%
+\contentsline {section}{\numberline {4.2}API Gateway}{23}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Microsserviços}{24}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Serviço de Autenticação (Auth)}{24}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Serviço de Restaurantes (Restaurants)}{24}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Serviço de Reservas (Reservations)}{25}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}Serviço de Fila de Espera (Waitlist)}{26}{subsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.3.5}Serviço de Notificações (Notifications)}{26}{subsection.4.3.5}%
+\contentsline {section}{\numberline {4.4}Comunicação entre Serviços}{27}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Dados}{27}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Segurança}{28}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Documentação das APIs}{28}{section.4.7}%
+\contentsline {chapter}{\numberline {5}Resiliência e Observabilidade}{29}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Princípios}{29}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Respostas de Erro}{29}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Resiliência na Comunicação Síncrona}{30}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Comportamento em Caso de Falhas}{30}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Limitações Conhecidas}{31}{section.5.5}%
+\contentsline {chapter}{\numberline {6}Testes}{32}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Testes de Integração}{32}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Testes Obrigatórios}{32}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Resultados}{33}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Testes de Sistema}{34}{section.6.4}%
+\contentsline {chapter}{\numberline {7}Containers -- Docker}{35}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Imagens}{35}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Ambiente com Docker Compose}{35}{section.7.2}%
+\contentsline {chapter}{\numberline {8}Conclusão e Trabalho Futuro}{36}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Requisitos Cumpridos}{36}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Conclusão}{37}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Trabalho Futuro}{38}{section.8.3}%
+\contentsline {chapter}{Bibliografia}{39}{chapter*.33}%
