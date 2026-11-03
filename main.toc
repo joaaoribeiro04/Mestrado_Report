@@ -59,9 +59,9 @@
 \contentsline {subsection}{\numberline {4.3.3}Serviço de Reservas (Reservations)}{24}{subsection.4.3.3}%
 \contentsline {subsection}{\numberline {4.3.4}Serviço de Fila de Espera (Waitlist)}{25}{subsection.4.3.4}%
 \contentsline {subsection}{\numberline {4.3.5}Serviço de Notificações (Notifications)}{25}{subsection.4.3.5}%
-\contentsline {section}{\numberline {4.4}Comunicação entre Serviços}{25}{section.4.4}%
+\contentsline {section}{\numberline {4.4}Comunicação entre Serviços}{26}{section.4.4}%
 \contentsline {section}{\numberline {4.5}Dados}{26}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Segurança}{26}{section.4.6}%
+\contentsline {section}{\numberline {4.6}Segurança}{27}{section.4.6}%
 \contentsline {section}{\numberline {4.7}Documentação das APIs}{27}{section.4.7}%
 \contentsline {chapter}{\numberline {5}Resiliência e Observabilidade}{28}{chapter.5}%
 \contentsline {section}{\numberline {5.1}Princípios}{28}{section.5.1}%

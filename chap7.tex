@@ -4,9 +4,9 @@
 \section{Imagens}
 
 Todos os serviços usam o mesmo \textit{Dockerfile}, em duas fases e com imagens oficiais da
-Microsoft: a compilação é feita na imagem do SDK do .NET 10 e o resultado é copiado para a imagem
-\texttt{aspnet:10.0}, mais pequena e sem ferramentas de compilação. O processo corre com um
-utilizador sem privilégios de administrador. O PostgreSQL, o RabbitMQ e o Jaeger usam também as
+Microsoft: a compilação é feita na imagem do SDK do .NET 10~\cite{dotnet} e o resultado é copiado para a imagem
+\texttt{aspnet:10.0}~\cite{aspnetcore}, mais pequena e sem ferramentas de compilação. O processo corre com um
+utilizador sem privilégios de administrador. O PostgreSQL~\cite{postgresql}, o RabbitMQ~\cite{rabbitmq} e o Jaeger~\cite{jaeger} usam também as
 imagens oficiais.
 
 \section{Ambiente com Docker Compose}
@@ -29,7 +29,7 @@ docker compose --env-file .env -f deploy/docker-compose.yml up -d --build
 \texttt{auth-api}, \texttt{restaurants-api}, \texttt{reservations-api}, \texttt{waitlist-api}, \texttt{notifications-api}
 & Microsserviços, apenas na rede interna \\
 \texttt{postgres}
-& PostgreSQL 17; um \textit{script} de arranque cria as cinco bases de dados e um utilizador só de leitura para exportação de dados \\
+& PostgreSQL 17~\cite{postgresql}; um \textit{script} de arranque cria as cinco bases de dados e um utilizador só de leitura para exportação de dados \\
 \texttt{rabbitmq}
 & \textit{Broker} de mensagens \\
 \texttt{jaeger}
@@ -40,7 +40,6 @@ docker compose --env-file .env -f deploy/docker-compose.yml up -d --build
 \label{tab:containeres}
 \end{table}
 
-Os serviços só arrancam depois de o PostgreSQL e o RabbitMQ estarem prontos, e cada serviço aplica as suas \textit{migrations} ao arrancar. As credenciais e a
-chave do JWT vêm de um ficheiro \texttt{.env} que nunca é guardado no repositório; o repositório
-inclui apenas um \texttt{.env.example}. Em ambiente de desenvolvimento, os serviços criam os dados de
-exemplo do protótipo (três restaurantes em Braga e as contas de cliente, gestora e administrador).
+Os serviços só arrancam depois de o PostgreSQL~\cite{postgresql} e o RabbitMQ~\cite{rabbitmq} estarem prontos, e cada serviço aplica as suas \textit{migrations} ao arrancar. As credenciais e a
+chave do JWT~\cite{rfc7519} vêm de um ficheiro \texttt{.env} que nunca é guardado no repositório; o repositório
+inclui apenas um \texttt{.env.example}.

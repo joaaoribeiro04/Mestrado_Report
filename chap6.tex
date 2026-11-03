@@ -11,7 +11,7 @@ Cada serviço tem testes de integração que arrancam a aplicação completa em 
 (\texttt{WebApplicationFactory}) e enviam pedidos HTTP reais, com:
 
 \begin{itemize}
-  \item \textbf{Base de dados real:} um PostgreSQL 17 novo por classe de testes, criado num
+  \item \textbf{Base de dados real:} um PostgreSQL 17~\cite{postgresql} novo por classe de testes, criado num
         container pelo Testcontainers, com as \textit{migrations} reais aplicadas. Os testes usam
         assim as mesmas restrições, índices e bloqueios que a produção;
   \item \textbf{Mensagens em memória:} o MassTransit é substituído pelo seu \textit{test harness}, que
@@ -54,7 +54,7 @@ Reservations \\
 \end{table}
 
 Para além destes, os testes de integração cobrem o registo, o login e a rotação de tokens, o
-bloqueio de clientes, a eliminação de conta (RGPD), a disponibilidade com horas esgotadas, a
+bloqueio de clientes, a eliminação de conta (RGPD)~\cite{rgpd}, a disponibilidade com horas esgotadas, a
 chegada com sugestão de mesa, a idempotência das notificações, as preferências de email, a
 resposta 503 quando uma dependência está em baixo e as mensagens de erro em português.
 
@@ -79,8 +79,8 @@ Notifications & 13 \\
 \label{tab:resultados-testes}
 \end{table}
 
-Os testes executam-se com \texttt{dotnet test} (com o Docker a correr, para os containers do
-PostgreSQL) e terminam em cerca de 30 segundos. Durante o desenvolvimento foi detetado e corrigido
+Os testes executam-se com \texttt{dotnet test} (com o Docker~\cite{docker} a correr, para os containers do
+PostgreSQL)~\cite{postgresql} e terminam em cerca de 30 segundos. Durante o desenvolvimento foi detetado e corrigido
 um problema de estabilidade nos testes: o \textit{test harness} do MassTransit é partilhado por todos
 os testes de uma classe e, depois do primeiro teste, a sua espera por mensagens respondia antes de
 a mensagem nova chegar, o que fazia falhar testes consoante a ordem de execução. As esperas passaram
@@ -90,8 +90,8 @@ falhas.
 \section{Testes de Sistema}
 \label{sec:testes-sistema}
 
-Os testes de sistema usam o ambiente completo (Docker Compose) e passam pelo API Gateway, tal como
-a aplicação. Estão em duas \textit{collections} do Postman, executáveis também na linha de comandos
+Os testes de sistema usam o ambiente completo (Docker Compose)~\cite{compose} e passam pelo API Gateway, tal como
+a aplicação. Estão em duas \textit{collections} do Postman~\cite{postman}, executáveis também na linha de comandos
 com o Newman:
 
 \begin{itemize}

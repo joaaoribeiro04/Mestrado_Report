@@ -7,9 +7,9 @@ comunicam entre si, as regras de negócio e a segurança.
 
 \section{Visão Geral e Tecnologias}
 
-A plataforma é composta por um API Gateway e cinco microsserviços, um por área de negócio,
+A plataforma é composta por um API Gateway e cinco microsserviços, um por área de negócio~\cite{newman},
 cada um com a sua própria base de dados (RNF06). Os serviços comunicam sobretudo por
-eventos assíncronos através de um \textit{broker} de mensagens; a única chamada síncrona entre
+eventos assíncronos através de um \textit{broker}~\cite{rabbitmq,masstransit} de mensagens; a única chamada síncrona entre
 serviços é a do serviço de reservas ao serviço de restaurantes, para obter os dados do
 restaurante no momento da reserva.
 
@@ -32,8 +32,8 @@ O gateway é o único componente exposto ao exterior (RNF03). As suas responsabi
 \begin{itemize}
   \item \textbf{Encaminhamento:} cada prefixo de rota (\texttt{/api/auth}, \texttt{/api/restaurants},
         \texttt{/api/reservations}, \texttt{/api/waitlist}, \texttt{/api/notifications}) é
-        encaminhado para o serviço correspondente, na rede interna do Docker;
-  \item \textbf{Autenticação:} o JWT é validado no gateway antes de o pedido chegar ao serviço.
+        encaminhado para o serviço correspondente, na rede interna do Docker~\cite{docker};
+  \item \textbf{Autenticação:} o JWT~\cite{rfc7519} é validado no gateway antes de o pedido chegar ao serviço.
         As rotas públicas do Auth (registo, login, renovação do token e recuperação de
         palavra-passe) são as únicas que não exigem token;
   \item \textbf{Limite de pedidos:} as rotas públicas do Auth aceitam no máximo 10 pedidos por
@@ -43,7 +43,7 @@ O gateway é o único componente exposto ao exterior (RNF03). As suas responsabi
         devolve uma resposta clara;
 \end{itemize}
 
-O JWT é validado no gateway e outra vez em cada serviço, com a mesma chave. Assim, um serviço
+O JWT~\cite{rfc7519} é validado no gateway e outra vez em cada serviço, com a mesma chave. Assim, um serviço
 nunca confia apenas na rede: mesmo que um pedido chegasse sem passar pelo gateway, seria
 recusado sem um token válido.
 
@@ -138,15 +138,14 @@ cliente (\texttt{customer\_name}) para o ecrã do gestor. \textbf{Endpoints:} 11
 
 \subsection{Serviço de Notificações (Notifications)}
 
-\textbf{Responsabilidade:} envio de emails, registo e lista das notificações de cada utilizador.
+\textbf{Responsabilidade:} envio de emails, registo e lista das notificações de cada utilizador. É o serviço que integra o serviço externo da plataforma, o Mailtrap.
 
 \begin{itemize}
-  \item \textbf{Consumidores:} reserva confirmada, alterada e cancelada; grupo chamado da fila;
-        pedido de revisão de bloqueio (enviado ao administrador); cliente bloqueado; recuperação
-        de palavra-passe; eliminação de conta (anonimiza o registo);
+  \item \textbf{Consumidores:} reserva confirmada, alterada e cancelada; grupo chamado da fila; pedido de revisão de bloqueio (enviado ao administrador); cliente bloqueado; recuperação de palavra-passe; eliminação de conta (anonimiza o registo);
   \item \textbf{Modelos:} sete modelos de mensagem em português, editáveis pelo administrador;
   \item \textbf{Preferências:} cada utilizador pode desligar os avisos por email;
-  \item \textbf{Envio:} por SMTP com MailKit. Uma falha de SMTP não bloqueia o consumidor: a notificação fica registada como falhada.
+  \item \textbf{Envio pela API do Mailtrap::} os emails são enviados para uma caixa de testes (sandbox) do Mailtrap~\cite{mailtrap} através da sua API HTTP, por HTTPS (porta 443), com um token de acesso e o identificador da caixa definidos em variáveis de ambiente. A caixa recebe todos os emails sem os entregar aos destinatários reais, o que permite verificar o conteúdo de cada mensagem durante o desenvolvimento e a demonstração;
+  \item \textbf{Registo e falhas:} cada notificação fica registada com o estado Sent (aceite pelo Mailtrap~\cite{mailtrap}), Failed (com a mensagem de erro) ou Skipped (utilizador com os emails desligados). Uma falha no envio não bloqueia o consumidor, e cada notificação guarda o identificador da mensagem que lhe deu origem, para que um evento repetido não envie o mesmo email duas vezes.
 \end{itemize}
 
 \textbf{Dados:} \texttt{notification\_log}, \texttt{preferences} e \texttt{templates}.
@@ -188,14 +187,14 @@ idempotentes}: processar duas vezes a mesma mensagem tem o mesmo efeito que proc
 vez (por exemplo, a falta é registada numa tabela cuja chave primária é o identificador da
 reserva, e cada notificação guarda o identificador da mensagem que lhe deu origem). Em caso de
 erro, cada consumidor tenta outra vez até três vezes, com intervalos de 5 segundos. Cada serviço
-tem as suas próprias filas no RabbitMQ (por exemplo \texttt{waitlist-table-freed} e
+tem as suas próprias filas no RabbitMQ~\cite{rabbitmq} (por exemplo \texttt{waitlist-table-freed} e
 \texttt{notifications-reservation-confirmed}), de modo que cada um recebe a sua cópia do evento.
 
 \section{Dados}
 
-Cada serviço tem a sua base de dados no mesmo servidor PostgreSQL e nunca acede à de outro; entre
+Cada serviço tem a sua base de dados no mesmo servidor PostgreSQL~\cite{postgresql} e nunca acede à de outro; entre
 serviços só existem identificadores (\texttt{uuid}), nunca chaves estrangeiras. O esquema de cada
-serviço é versionado com \textit{migrations} do Entity Framework Core, aplicadas automaticamente
+serviço é versionado com \textit{migrations} do Entity Framework Core~\cite{efcore}, aplicadas automaticamente
 quando o serviço arranca. As regras de integridade estão também na própria base de dados:
 restrições únicas (email do utilizador, nome da mesa por restaurante, reserva do mesmo cliente à
 mesma hora), restrições \texttt{CHECK} (capacidade e número de pessoas positivos) e índices
@@ -205,24 +204,24 @@ restaurantes em hora de Lisboa.
 \section{Segurança}
 
 \begin{itemize}
-  \item \textbf{Autenticação:} JWT assinado com HS256, validado no gateway e em cada serviço, com
+  \item \textbf{Autenticação:} JWT~\cite{rfc7519} assinado com HS256~\cite{rfc7519}, validado no gateway e em cada serviço, com
         os perfis Cliente, Gestor e Administrador. O token do gestor indica o seu restaurante;
   \item \textbf{Autorização:} políticas por perfil e verificação ``gestor do próprio restaurante''
         (um gestor que tenta alterar mesas ou reservas de outro restaurante recebe 403). Um
         cliente que pede dados de outro cliente recebe 404, para não revelar que existem;
-  \item \textbf{Palavras-passe e tokens:} palavras-passe com BCrypt; \textit{refresh tokens} e
+  \item \textbf{Palavras-passe e tokens:} palavras-passe com BCrypt~\cite{bcrypt}; \textit{refresh tokens} e
         tokens de recuperação guardados apenas como \textit{hash};
   \item \textbf{Respostas genéricas:} o login e a recuperação de palavra-passe não revelam que
         emails existem; um cliente bloqueado recebe a mesma mensagem que credenciais erradas;
-  \item \textbf{Rede:} só o gateway publica uma porta; os serviços, o PostgreSQL e o RabbitMQ
+  \item \textbf{Rede:} só o gateway publica uma porta; os serviços, o PostgreSQL~\cite{postgresql} e o RabbitMQ~\cite{rabbitmq}
         ficam numa rede interna, com utilizador e palavra-passe;
   \item \textbf{RGPD (RNF09):} consentimento guardado no registo; eliminar a conta anonimiza nome,
-        email e telefone em todos os serviços e mantém as reservas apenas para estatística.
+        email e telefone em todos os serviços e mantém as reservas apenas para estatística.~\cite{rgpd}
 \end{itemize}
 
 \section{Documentação das APIs}
 
-Cada serviço documenta a sua API em OpenAPI (RNF06). Todos os \textit{endpoints} declaram as
+Cada serviço documenta a sua API em OpenAPI~\cite{openapi} (RNF06). Todos os \textit{endpoints} declaram as
 respostas possíveis, incluindo os erros (400, 401, 403, 404, 409, 422 e 503), e o esquema de
 autenticação Bearer. Os documentos são gerados automaticamente em cada compilação para a pasta
-\texttt{docs/openapi} (um ficheiro por serviço), sem ser preciso ter os serviços a correr.
+\texttt{docs/openapi}~\cite{openapi} (um ficheiro por serviço), sem ser preciso ter os serviços a correr.

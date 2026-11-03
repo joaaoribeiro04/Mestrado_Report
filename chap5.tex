@@ -14,7 +14,7 @@ aplicação, e como se acompanha cada pedido de ponta a ponta.
   \item \textbf{Comunicação assíncrona:} os serviços avisam-se por eventos no RabbitMQ~\cite{rabbitmq}. Se o
         consumidor estiver em baixo, o evento fica na fila e é processado quando o serviço
         volta. É o que garante o RNF04: uma falha no serviço de notificações não impede a criação de reservas;
-  \item \textbf{Autenticação sem dependências:} o JWT é validado localmente no gateway e em cada
+  \item \textbf{Autenticação sem dependências:} o JWT~\cite{rfc7519} é validado localmente no gateway e em cada
         serviço; sem o serviço de autenticação deixa de ser possível iniciar sessão, mas os
         tokens já emitidos continuam válidos;
   \item \textbf{Falhar depressa e com clareza:} uma dependência em baixo dá uma resposta 503 com uma
@@ -24,10 +24,10 @@ aplicação, e como se acompanha cada pedido de ponta a ponta.
 \section{Respostas de Erro}
 
 Todas as respostas de erro seguem o formato \textit{Problem Details} (RFC 9457) e estão em
-português, incluindo as que o ASP.NET Core gera automaticamente (falta de token, validação dos
+português, incluindo as que o ASP.NET Core~\cite{dotnet,aspnetcore} gera automaticamente (falta de token, validação dos
 campos, JSON mal formado). Cada resposta indica o serviço que produziu o erro (\texttt{service})
 e o identificador do pedido (\texttt{traceId}), que permite encontrá-lo nos registos e no
-Jaeger. Por exemplo, com o serviço de reservas parado:
+Jaeger~\cite{jaeger}. Por exemplo, com o serviço de reservas parado:
 
 \begin{verbatim}
 HTTP/1.1 503 Service Unavailable
@@ -54,7 +54,7 @@ X-Trace-Id: b289140cbcf9c7ea82409207641383cd
 409 & Conflito: reserva repetida, mesa já livre, sem mesas para a hora pedida \\
 422 & Pedido impossível: nenhuma mesa serve o grupo \\
 429 & Demasiados pedidos nas rotas públicas do Auth \\
-503 & Serviço, base de dados ou RabbitMQ indisponíveis \\
+503 & Serviço, base de dados ou RabbitMQ~\cite{rabbitmq} indisponíveis \\
 504 & Um serviço não respondeu a tempo ao gateway \\
 \bottomrule
 \end{tabularx}
@@ -76,8 +76,8 @@ serviços, e por isso é protegida com três mecanismos:
 
 \section{Comportamento em Caso de Falhas}
 
-Os cenários seguintes foram executados no ambiente completo (Docker Compose), parando um
-container de cada vez. Estão automatizados numa \textit{collection} do Postman própria. Os tempos indicados foram medidos.
+Os cenários seguintes foram executados no ambiente completo (Docker Compose)~\cite{compose}, parando um
+container de cada vez. Estão automatizados numa \textit{collection} do Postman~\cite{postman} própria. Os tempos indicados foram medidos.
 
 \begin{table}[H]
 \centering
@@ -93,7 +93,7 @@ Isolamento entre serviços; o gateway responde com clareza em vez de um 502 sem 
 \midrule
 Serviço de autenticação &
 Login: 503. Pedidos com um token já emitido: 200. &
-O JWT é validado localmente: o sistema continua a funcionar para quem já tem sessão. \\
+O JWT~\cite{rfc7519} é validado localmente: o sistema continua a funcionar para quem já tem sessão. \\
 \midrule
 Serviço de restaurantes &
 Reservar: 503 do serviço de reservas. 1.\textsuperscript{a} tentativa em cerca de 6,7~s
@@ -125,7 +125,7 @@ Limitação conhecida (Secção~\ref{sec:limitacoes}). \\
 \section{Limitações Conhecidas}
 \label{sec:limitacoes}
 
-Cada serviço grava a alteração na sua base de dados e só depois publica o evento. Se o RabbitMQ
+Cada serviço grava a alteração na sua base de dados e só depois publica o evento. Se o RabbitMQ~\cite{rabbitmq}
 estiver em baixo nesse momento, a alteração fica gravada mas os outros serviços não são avisados:
 por exemplo, a reserva existe, mas a fila de espera e as notificações nunca recebem o evento de
 confirmação. O sistema deteta a situação e responde 503 ao fim de 5 segundos, em vez de deixar
@@ -133,5 +133,5 @@ o pedido pendurado, mas a inconsistência mantém-se.
 
 A solução é o padrão \textit{transactional outbox}: o evento é gravado numa tabela da mesma base de
 dados, na mesma transação da alteração, e um processo em segundo plano publica-o quando o
-RabbitMQ estiver disponível. O MassTransit oferece esta funcionalidade para o Entity Framework
+RabbitMQ~\cite{rabbitmq} estiver disponível. O MassTransit oferece esta funcionalidade para o Entity Framework
 Core; fica como trabalho futuro, porque exige tabelas novas nos cinco serviços.
