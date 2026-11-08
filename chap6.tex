@@ -1,110 +1,201 @@
-\chapter{Testes}
-\label{cap:testes}
+\chapter{Resiliência e Observabilidade}
+\label{cap:resiliencia}
 
-A estratégia de testes cobre três níveis (RNF08): testes unitários da lógica de decisão, testes de
-integração de cada serviço com uma base de dados real, e testes de sistema que percorrem os fluxos
-completos através do API Gateway. Todos os testes são automáticos e repetíveis.
+Numa arquitetura de microsserviços, a falha de uma peça é uma situação normal e não uma
+exceção. Este capítulo descreve como a plataforma se comporta quando um serviço, uma
+dependência, a base de dados ou o \textit{broker} de mensagens falham, que respostas recebe a
+aplicação, e como se acompanha cada pedido de ponta a ponta.
 
-\section{Testes de Integração}
-
-Cada serviço tem testes de integração que arrancam a aplicação completa em memória
-(\texttt{WebApplicationFactory}) e enviam pedidos HTTP reais, com:
+\section{Princípios}
 
 \begin{itemize}
-  \item \textbf{Base de dados real:} um PostgreSQL 17~\cite{postgresql} novo por classe de testes, criado num
-        container pelo Testcontainers, com as \textit{migrations} reais aplicadas. Os testes usam
-        assim as mesmas restrições, índices e bloqueios que a produção;
-  \item \textbf{Mensagens em memória:} o MassTransit é substituído pelo seu \textit{test harness}, que
-        permite publicar eventos e verificar quais foram publicados e consumidos;
-  \item \textbf{Tokens de teste:} gerados com a mesma biblioteca e chave que o serviço de
-        autenticação, para cada perfil;
-  \item \textbf{Dependências simuladas:} o serviço de restaurantes é substituído nos testes do serviço
-        de reservas, incluindo um modo em que simula estar em baixo.
+  \item \textbf{Isolamento:} cada serviço tem a sua base de dados e o seu processo; a falha de um
+        serviço não impede os outros de responder;
+  \item \textbf{Comunicação assíncrona:} os serviços avisam-se por eventos no RabbitMQ~\cite{rabbitmq}. Se o
+        consumidor estiver em baixo, o evento fica na fila e é processado quando o serviço
+        volta. É o que garante o RNF04: uma falha no serviço de notificações não impede a criação de reservas;
+  \item \textbf{Autenticação sem dependências:} o JWT~\cite{rfc7519} é validado localmente no gateway e em cada
+        serviço; sem o serviço de autenticação deixa de ser possível iniciar sessão, mas os
+        tokens já emitidos continuam válidos;
+  \item \textbf{Falhar depressa e com clareza:} uma dependência em baixo dá uma resposta 503 com uma
+        mensagem que explica o que falhou, em vez de um erro genérico ou de um pedido pendurado.
 \end{itemize}
 
-\section{Testes Obrigatórios}
-\label{sec:testes-obrigatorios}
+\section{Respostas de Erro}
 
-A análise definiu um conjunto de testes obrigatórios para as regras críticas. Todos estão
-implementados e passam:
+Todas as respostas de erro seguem o formato \textit{Problem Details} (RFC 9457) e estão em
+português, incluindo as que o ASP.NET Core~\cite{dotnet,aspnetcore} gera automaticamente (falta de token, validação dos
+campos, JSON mal formado). Cada resposta indica o serviço que produziu o erro (\texttt{service})
+e o identificador do pedido (\texttt{traceId}), que permite encontrá-lo nos registos e no
+Jaeger~\cite{jaeger}. Por exemplo, com o serviço de reservas parado:
+
+\begin{verbatim}
+HTTP/1.1 503 Service Unavailable
+X-Trace-Id: b289140cbcf9c7ea82409207641383cd
+{
+  "title": "Serviço indisponível",
+  "status": 503,
+  "detail": "O serviço de reservas está indisponível.",
+  "service": "reservations",
+  "traceId": "00-b289140cbcf9c7ea82409207641383cd-ed21d1c051186c8d-01"
+}
+\end{verbatim}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Código} & \textbf{Quando} \\
+\midrule
+400 & Dados inválidos, com a lista de erros por campo \\
+401 & Sem sessão iniciada: token em falta, inválido ou expirado \\
+403 & Perfil sem permissão, ou gestor a atuar noutro restaurante \\
+404 & Recurso inexistente (ou de outro cliente) \\
+409 & Conflito: reserva repetida, mesa já livre, sem mesas para a hora pedida \\
+422 & Pedido impossível: nenhuma mesa serve o grupo \\
+429 & Demasiados pedidos nas rotas públicas do Auth \\
+503 & Serviço, base de dados ou RabbitMQ~\cite{rabbitmq} indisponíveis \\
+504 & Um serviço não respondeu a tempo ao gateway \\
+\bottomrule
+\end{tabularx}
+\caption{Códigos de erro devolvidos à aplicação}
+\label{tab:codigos}
+\end{table}
+
+\section{Resiliência na Comunicação Síncrona}
+\label{sec:resiliencia-http}
+
+A chamada do serviço de reservas ao serviço de restaurantes é a única dependência síncrona entre
+serviços, e por isso é protegida com três mecanismos:
+
+\begin{itemize}
+  \item \textbf{Tempo limite:} cada tentativa tem no máximo 2 segundos (8 segundos no total);
+  \item \textbf{Novas tentativas:} até duas, para falhas transitórias;
+  \item Se pelo menos metade de quatro ou mais chamadas falhar num intervalo de 10 segundos, o circuito abre durante 15 segundos. Enquanto está aberto, os pedidos falham imediatamente, sem esperar por um serviço que se sabe estar em baixo, o que evita acumular pedidos pendurados e consumir recursos.
+\end{itemize}
+
+\section{Comportamento em Caso de Falhas}
+
+Os cenários seguintes foram executados no ambiente completo (Docker Compose)~\cite{compose}, parando um
+container de cada vez. Estão automatizados numa \textit{collection} do Postman~\cite{postman} própria. Os tempos indicados foram medidos.
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabularx}{\textwidth}{Xl}
+\begin{tabularx}{\textwidth}{lXX}
 \toprule
-\textbf{Teste} & \textbf{Serviço} \\
+\textbf{Serviço parado} & \textbf{Resposta à aplicação} & \textbf{O que demonstra} \\
 \midrule
-10 pedidos de reserva em paralelo para 3 mesas dão exatamente 3 reservas (3 respostas 201 e 7
-respostas 409) & Reservations \\
-\texttt{ShouldProtect}: mesa de 4 livre às 19:40 com reserva de 3 às 20:00 fica protegida & Waitlist \\
-\texttt{ShouldProtect}: com a reserva às 21:30, a mesa vai para a fila & Waitlist \\
-\texttt{ShouldProtect}: com duas mesas livres, uma vai para a fila & Waitlist \\
-Um grupo de 6 não bloqueia um grupo de 2 quando só há mesa de 4 & Waitlist \\
-Duas mensagens \texttt{TableFreed} seguidas não promovem o mesmo grupo & Waitlist \\
-A mesma falta é contada uma só vez & Auth \\
-A média do tempo de refeição só substitui o valor inicial com 20 amostras e ignora refeições fora
-do intervalo de 15 minutos a 4 horas & Restaurants \\
-Um gestor não consegue alterar mesas nem reservas de outro restaurante (403) & Restaurants,
-Reservations \\
+Serviço de reservas &
+503 do gateway: ``O serviço de reservas está indisponível.'' Os restantes serviços continuam
+a responder normalmente. &
+Isolamento entre serviços; o gateway responde com clareza em vez de um 502 sem corpo. \\
+\midrule
+Serviço de autenticação &
+Login: 503. Pedidos com um token já emitido: 200. &
+O JWT~\cite{rfc7519} é validado localmente: o sistema continua a funcionar para quem já tem sessão. \\
+\midrule
+Serviço de restaurantes &
+Reservar: 503 do serviço de reservas. 1.\textsuperscript{a} tentativa em cerca de 6,7~s
+(tentativas com tempo limite), 2.\textsuperscript{a} em cerca de 2~s, a partir da
+3.\textsuperscript{a} em menos de 20~ms. ``As minhas reservas'' continua a
+funcionar. &
+Tempo limite e novas tentativas; só falham as operações que dependem do serviço em
+baixo. \\
+\midrule
+Serviço de notificações &
+A reserva é criada (201). Ao voltar, o serviço processa o evento que ficou na fila e a
+notificação aparece. &
+Comunicação assíncrona e consistência eventual (RNF04). \\
+\midrule
+PostgreSQL &
+503: ``A base de dados do serviço de restaurantes está indisponível.'' &
+Falhas de infraestrutura distinguem-se de erros do pedido. \\
+\midrule
+RabbitMQ &
+Reservar: 503 ao fim de 5~s: ``a alteração foi gravada, mas os outros serviços não foram
+avisados''. Ao voltar, os serviços religam-se sozinhos em 20 a 40~s. &
+Limitação conhecida (Secção~\ref{sec:limitacoes}). \\
 \bottomrule
 \end{tabularx}
-\caption{Testes obrigatórios}
-\label{tab:testes-obrigatorios}
+\caption{Comportamento do sistema com cada peça parada}
+\label{tab:falhas}
 \end{table}
 
-Para além destes, os testes de integração cobrem o registo, o login e a rotação de tokens, o
-bloqueio de clientes, a eliminação de conta (RGPD)~\cite{rgpd}, a disponibilidade com horas esgotadas, a
-chegada com sugestão de mesa, a idempotência das notificações, as preferências de email, a
-resposta 503 quando uma dependência está em baixo e as mensagens de erro em português.
+\section{Limitações Conhecidas}
+\label{sec:limitacoes}
 
-\section{Resultados}
+Cada serviço grava a alteração na sua base de dados e só depois publica o evento. Se o RabbitMQ~\cite{rabbitmq}
+estiver em baixo nesse momento, a alteração fica gravada mas os outros serviços não são avisados:
+por exemplo, a reserva existe, mas a fila de espera e as notificações nunca recebem o evento de
+confirmação. O sistema deteta a situação e responde 503 ao fim de 5 segundos, em vez de deixar
+o pedido pendurado, mas a inconsistência mantém-se.
 
-\begin{table}[H]
-\centering
-\begin{tabular}{lr}
+A solução é o padrão \textit{transactional outbox}: o evento é gravado numa tabela da mesma base de
+dados, na mesma transação da alteração, e um processo em segundo plano publica-o quando o
+RabbitMQ~\cite{rabbitmq} estiver disponível. O MassTransit oferece esta funcionalidade para o Entity Framework
+Core; fica como trabalho futuro, porque exige tabelas novas nos cinco serviços.
+
+\section{Requisitos Cumpridos}
+
+A Tabela~\ref{tab:rastreabilidade} relaciona cada requisito definido na Secção~2.3 com a sua
+implementação.
+
+\begin{longtable}{p{0.09\textwidth}p{0.13\textwidth}p{0.66\textwidth}}
+\label{tab:rastreabilidade} \\
 \toprule
-\textbf{Projeto de testes} & \textbf{Testes} \\
+\textbf{Req.} & \textbf{Estado} & \textbf{Implementação} \\
 \midrule
-Auth & 26 \\
-Restaurants & 20 \\
-Reservations & 29 \\
-Waitlist & 26 \\
-Notifications & 13 \\
+\endfirsthead
+\toprule
+\textbf{Req.} & \textbf{Estado} & \textbf{Implementação} \\
 \midrule
-\textbf{Total} & \textbf{114} \\
+\endhead
 \bottomrule
-\end{tabular}
-\caption{Testes unitários e de integração por serviço (todos aprovados)}
-\label{tab:resultados-testes}
-\end{table}
-
-Os testes executam-se com \texttt{dotnet test} (com o Docker~\cite{docker} a correr, para os containers do
-PostgreSQL)~\cite{postgresql} e terminam em cerca de 30 segundos. Durante o desenvolvimento foi detetado e corrigido
-um problema de estabilidade nos testes: o \textit{test harness} do MassTransit é partilhado por todos
-os testes de uma classe e, depois do primeiro teste, a sua espera por mensagens respondia antes de
-a mensagem nova chegar, o que fazia falhar testes consoante a ordem de execução. As esperas passaram
-a consultar a lista de mensagens até um prazo, e a suíte foi executada várias vezes seguidas sem
-falhas.
-
-\section{Testes de Sistema}
-\label{sec:testes-sistema}
-
-Os testes de sistema usam o ambiente completo (Docker Compose)~\cite{compose} e passam pelo API Gateway, tal como
-a aplicação. Estão em duas \textit{collections} do Postman~\cite{postman}, executáveis também na linha de comandos
-com o Newman:
-
-\begin{itemize}
-  \item \textbf{Fluxo completo} (34 pedidos, 77 verificações): o administrador cria um restaurante,
-        as mesas e o gestor; o cliente regista-se, renova o token, pesquisa, consulta a
-        disponibilidade, reserva (e recebe 409 na reserva repetida) e entra na fila; o gestor
-        marca a chegada (com sugestão de mesa), a falta, liberta a mesa e recebe 403 noutro
-        restaurante; o administrador confirma a falta contada, bloqueia o cliente, e o login
-        seguinte é recusado;
-  \item \textbf{Cenários de falha} (64 verificações): os seis cenários da
-        Tabela~\ref{tab:falhas}, executados pedido a pedido, parando e arrancando os containers
-        indicados.
-\end{itemize}
-
-Ambas incluem verificações comuns a todos os pedidos: a resposta tem o cabeçalho
-\texttt{X-Trace-Id} e os erros vêm no formato \textit{Problem Details}. Todas as verificações passaram.
+\endfoot
+RF01 & Cumprido & Registo de clientes e login (Auth); gestores criados pelo administrador \\
+RF02 & Cumprido & Recuperação de palavra-passe com ligação por email (Auth e Notifications) \\
+RF03 & Cumprido & Pesquisa por texto (nome, cozinha, cidade), cozinha, data e número de pessoas;
+a hora escolhe-se na disponibilidade (Restaurants) \\
+RF04 & Cumprido & Detalhes do restaurante e horas disponíveis, incluindo as esgotadas
+(Restaurants e Reservations) \\
+RF05 & Cumprido & Reserva com data, hora e número de pessoas, sem exceder as mesas \\
+RF06 & Cumprido & Consultar (próximas e histórico), alterar e cancelar reservas \\
+RF07 & Cumprido & Entrar e sair da fila, posição, total de grupos e tempo estimado \\
+RF08 & Cumprido & Emails de reserva confirmada, alterada e cancelada e de mesa disponível para o
+grupo da fila (Notifications) \\
+RF09 & Cumprido & Reservas do restaurante, reservas manuais, chegada com sugestão de mesa e não
+comparência \\
+RF10 & Cumprido & Fila do restaurante, chamar o próximo grupo que cabe e atribuição automática de
+mesas livres \\
+RF11 & Cumprido & Mesas, capacidades, turnos, horários e tempo médio de refeição \\
+RF12 & Parcial & Ocupação por dia e tempo médio de refeição real (Restaurants); taxa de faltas
+nos relatórios do administrador. Faltam estatísticas dos tempos de espera da fila \\
+RF13 & Cumprido & Criar e editar restaurantes; remover é feito por desativação, para manter o
+histórico \\
+RF14 & Cumprido & Lista de utilizadores com filtros, bloqueio e desbloqueio; os clientes que
+atingem o limite de faltas ficam marcados para revisão \\
+RF15 & Cumprido & Limite de faltas (Auth) e tempo de refeição, margem e tolerância por defeito
+(Restaurants) \\
+RF16 & Cumprido & Reservas e taxa de faltas por restaurante ou por região \\
+RF17 & Cumprido & Alterar palavra-passe e fotografia de perfil \\
+\midrule
+RNF01 & Por medir & Estimativa atualizada por eventos, em menos de um segundo após cada alteração;
+não foram feitos testes de carga para medir o percentil 95 \\
+RNF02 & Parcial & JWT~\cite{rfc7519} validado no gateway e em cada serviço, BCrypt~\cite{bcrypt}, controlo de acesso por perfil.
+O ambiente local usa HTTP; o HTTPS fica a cargo do ponto de entrada em produção \\
+RNF03 & Cumprido & Só o gateway publica uma porta; serviços, base de dados e RabbitMQ~\cite{rabbitmq} na rede
+interna \\
+RNF04 & Cumprido & Comunicação assíncrona; demonstrado com o serviço de notificações parado
+(Tabela~\ref{tab:falhas}) \\
+RNF05 & Cumprido & Os microsserviços devem ser executados em containers Docker~\cite{docker} e não guardar estado em memória: os dados ficam na respetiva base de dados PostgreSQL~\cite{postgresql} e as mensagens no RabbitMQ~\cite{rabbitmq}.\\
+RNF06 & Cumprido & Um serviço e uma base de dados por área de negócio, \textit{migrations}
+versionadas e OpenAPI~\cite{openapi} de cada serviço \\
+RNF07 & Protótipo & Abordagem \textit{mobile first} definida no protótipo de alta fidelidade; a
+aplicação cliente não fez parte da implementação \\
+RNF08 & Cumprido & 114 testes unitários e de integração e duas \textit{collections} do Postman~\cite{postman}
+(Capítulo~\ref{cap:testes}) \\
+RNF09 & Cumprido & Consentimento no registo e eliminação de conta com anonimização em todos os
+serviços \\
+\caption{Rastreabilidade dos requisitos}
+\end{longtable}

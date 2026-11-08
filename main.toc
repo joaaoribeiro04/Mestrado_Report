@@ -51,35 +51,50 @@
 \contentsline {subsubsection}{Tarefa principal -- Reservar mesa para refeição.}{21}{subsection.3.2.3}%
 \contentsline {subsubsection}{Tarefa secundária -- Entrar na fila de espera.}{21}{figure.caption.25}%
 \contentsline {section}{\numberline {3.3}Vídeo de Demonstração}{22}{section.3.3}%
-\contentsline {chapter}{\numberline {4}Implementação da Arquitetura}{23}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Visão Geral e Tecnologias}{23}{section.4.1}%
-\contentsline {section}{\numberline {4.2}API Gateway}{23}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Microsserviços}{24}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Serviço de Autenticação (Auth)}{24}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}Serviço de Restaurantes (Restaurants)}{24}{subsection.4.3.2}%
-\contentsline {subsection}{\numberline {4.3.3}Serviço de Reservas (Reservations)}{25}{subsection.4.3.3}%
-\contentsline {subsection}{\numberline {4.3.4}Serviço de Fila de Espera (Waitlist)}{26}{subsection.4.3.4}%
-\contentsline {subsection}{\numberline {4.3.5}Serviço de Notificações (Notifications)}{26}{subsection.4.3.5}%
-\contentsline {section}{\numberline {4.4}Comunicação entre Serviços}{27}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Dados}{27}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Segurança}{28}{section.4.6}%
-\contentsline {section}{\numberline {4.7}Documentação das APIs}{28}{section.4.7}%
-\contentsline {chapter}{\numberline {5}Resiliência e Observabilidade}{29}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Princípios}{29}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Respostas de Erro}{29}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Resiliência na Comunicação Síncrona}{30}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Comportamento em Caso de Falhas}{30}{section.5.4}%
-\contentsline {section}{\numberline {5.5}Limitações Conhecidas}{31}{section.5.5}%
-\contentsline {chapter}{\numberline {6}Testes}{32}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Testes de Integração}{32}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Testes Obrigatórios}{32}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Resultados}{33}{section.6.3}%
-\contentsline {section}{\numberline {6.4}Testes de Sistema}{34}{section.6.4}%
-\contentsline {chapter}{\numberline {7}Containers -- Docker}{35}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Imagens}{35}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Ambiente com Docker Compose}{35}{section.7.2}%
-\contentsline {chapter}{\numberline {8}Conclusão e Trabalho Futuro}{36}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Requisitos Cumpridos}{36}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Conclusão}{37}{section.8.2}%
-\contentsline {section}{\numberline {8.3}Trabalho Futuro}{38}{section.8.3}%
-\contentsline {chapter}{Bibliografia}{39}{chapter*.33}%
+\contentsline {chapter}{\numberline {4}Análise Heurística}{23}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Análise Heurística Simplificada}{23}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Problemas de Usabilidade}{24}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Problema 1: conteúdo cortado nos ecrãs longos}{24}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Problema 2: filtros e seletores sem resposta}{25}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Problema 3: navegação pouco persistente e botão voltar pouco visível}{25}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Problema 4: áreas de toque pequenas}{26}{subsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.2.5}Problema 5: campos de texto pouco reconhecíveis}{26}{subsection.4.2.5}%
+\contentsline {section}{\numberline {4.3}Correções e Melhorias}{26}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Correção 1: \textit {scroll} nos ecrãs longos}{27}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Correção 2: filtros e seletores interativos}{28}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Correção 3: navegação fixa e botão voltar mais visível}{29}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}Correção 4: áreas de toque com o mínimo recomendado}{30}{subsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.3.5}Correção 5: campos de texto com cor própria}{31}{subsection.4.3.5}%
+\contentsline {subsection}{\numberline {4.3.6}Outras melhorias}{32}{subsection.4.3.6}%
+\contentsline {chapter}{\numberline {5}Implementação da Arquitetura}{34}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Visão Geral e Tecnologias}{34}{section.5.1}%
+\contentsline {section}{\numberline {5.2}API Gateway}{34}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Microsserviços}{35}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Serviço de Autenticação (Auth)}{35}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}Serviço de Restaurantes (Restaurants)}{35}{subsection.5.3.2}%
+\contentsline {subsection}{\numberline {5.3.3}Serviço de Reservas (Reservations)}{36}{subsection.5.3.3}%
+\contentsline {subsection}{\numberline {5.3.4}Serviço de Fila de Espera (Waitlist)}{37}{subsection.5.3.4}%
+\contentsline {subsection}{\numberline {5.3.5}Serviço de Notificações (Notifications)}{37}{subsection.5.3.5}%
+\contentsline {section}{\numberline {5.4}Comunicação entre Serviços}{38}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Dados}{38}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Segurança}{39}{section.5.6}%
+\contentsline {section}{\numberline {5.7}Documentação das APIs}{39}{section.5.7}%
+\contentsline {chapter}{\numberline {6}Resiliência e Observabilidade}{40}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Princípios}{40}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Respostas de Erro}{40}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Resiliência na Comunicação Síncrona}{41}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Comportamento em Caso de Falhas}{41}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Limitações Conhecidas}{42}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Requisitos Cumpridos}{43}{section.6.6}%
+\contentsline {chapter}{\numberline {7}Testes}{45}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Testes de Integração}{45}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Testes Obrigatórios}{45}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Resultados}{46}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Testes de Sistema}{47}{section.7.4}%
+\contentsline {chapter}{\numberline {8}Containers -- Docker}{48}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Imagens}{48}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Ambiente com Docker Compose}{48}{section.8.2}%
+\contentsline {chapter}{\numberline {9}Conclusão e Trabalho Futuro}{49}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Conclusão}{49}{section.9.1}%
+\contentsline {section}{\numberline {9.2}Trabalho Futuro}{49}{section.9.2}%
+\contentsline {chapter}{Bibliografia}{50}{chapter*.38}%

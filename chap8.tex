@@ -1,96 +1,45 @@
-\chapter{Conclusão e Trabalho Futuro}
-\label{cap:conclusao}
+\chapter{Containers -- Docker}
+\label{cap:implantacao}
 
-\section{Requisitos Cumpridos}
+\section{Imagens}
 
-A Tabela~\ref{tab:rastreabilidade} relaciona cada requisito definido na Secção~2.3 com a sua
-implementação.
+Todos os serviços usam o mesmo \textit{Dockerfile}, em duas fases e com imagens oficiais da
+Microsoft: a compilação é feita na imagem do SDK do .NET 10~\cite{dotnet} e o resultado é copiado para a imagem
+\texttt{aspnet:10.0}~\cite{aspnetcore}, mais pequena e sem ferramentas de compilação. O processo corre com um
+utilizador sem privilégios de administrador. O PostgreSQL~\cite{postgresql}, o RabbitMQ~\cite{rabbitmq} e o Jaeger~\cite{jaeger} usam também as
+imagens oficiais.
 
-\begin{longtable}{p{0.09\textwidth}p{0.13\textwidth}p{0.66\textwidth}}
-\label{tab:rastreabilidade} \\
+\section{Ambiente com Docker Compose}
+
+O ficheiro \texttt{deploy/docker-compose.yml} arranca o ambiente completo com um só comando:
+
+\begin{verbatim}
+docker compose --env-file .env -f deploy/docker-compose.yml up -d --build
+\end{verbatim}
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.28\textwidth} X}
 \toprule
-\textbf{Req.} & \textbf{Estado} & \textbf{Implementação} \\
+\textbf{Container} & \textbf{Função} \\
 \midrule
-\endfirsthead
-\toprule
-\textbf{Req.} & \textbf{Estado} & \textbf{Implementação} \\
-\midrule
-\endhead
+\texttt{gateway} & API Gateway; único com porta publicada (8080) \\
+\texttt{auth-api}, \texttt{restaurants-api}, \texttt{reservations-api}, \texttt{waitlist-api}, \texttt{notifications-api}
+& Microsserviços, apenas na rede interna \\
+\texttt{postgres}
+& PostgreSQL 17~\cite{postgresql}; um \textit{script} de arranque cria as cinco bases de dados e um utilizador só de leitura para exportação de dados \\
+\texttt{rabbitmq}
+& \textit{Broker} de mensagens \\
+\texttt{jaeger}
+& Rastreio distribuído; interface apenas acessível na própria máquina \\
 \bottomrule
-\endfoot
-RF01 & Cumprido & Registo de clientes e login (Auth); gestores criados pelo administrador \\
-RF02 & Cumprido & Recuperação de palavra-passe com ligação por email (Auth e Notifications) \\
-RF03 & Cumprido & Pesquisa por texto (nome, cozinha, cidade), cozinha, data e número de pessoas;
-a hora escolhe-se na disponibilidade (Restaurants) \\
-RF04 & Cumprido & Detalhes do restaurante e horas disponíveis, incluindo as esgotadas
-(Restaurants e Reservations) \\
-RF05 & Cumprido & Reserva com data, hora e número de pessoas, sem exceder as mesas \\
-RF06 & Cumprido & Consultar (próximas e histórico), alterar e cancelar reservas \\
-RF07 & Cumprido & Entrar e sair da fila, posição, total de grupos e tempo estimado \\
-RF08 & Cumprido & Emails de reserva confirmada, alterada e cancelada e de mesa disponível para o
-grupo da fila (Notifications) \\
-RF09 & Cumprido & Reservas do restaurante, reservas manuais, chegada com sugestão de mesa e não
-comparência \\
-RF10 & Cumprido & Fila do restaurante, chamar o próximo grupo que cabe e atribuição automática de
-mesas livres \\
-RF11 & Cumprido & Mesas, capacidades, turnos, horários e tempo médio de refeição \\
-RF12 & Parcial & Ocupação por dia e tempo médio de refeição real (Restaurants); taxa de faltas
-nos relatórios do administrador. Faltam estatísticas dos tempos de espera da fila \\
-RF13 & Cumprido & Criar e editar restaurantes; remover é feito por desativação, para manter o
-histórico \\
-RF14 & Cumprido & Lista de utilizadores com filtros, bloqueio e desbloqueio; os clientes que
-atingem o limite de faltas ficam marcados para revisão \\
-RF15 & Cumprido & Limite de faltas (Auth) e tempo de refeição, margem e tolerância por defeito
-(Restaurants) \\
-RF16 & Cumprido & Reservas e taxa de faltas por restaurante ou por região \\
-RF17 & Cumprido & Alterar palavra-passe e fotografia de perfil \\
-\midrule
-RNF01 & Por medir & Estimativa atualizada por eventos, em menos de um segundo após cada alteração;
-não foram feitos testes de carga para medir o percentil 95 \\
-RNF02 & Parcial & JWT~\cite{rfc7519} validado no gateway e em cada serviço, BCrypt~\cite{bcrypt}, controlo de acesso por perfil.
-O ambiente local usa HTTP; o HTTPS fica a cargo do ponto de entrada em produção \\
-RNF03 & Cumprido & Só o gateway publica uma porta; serviços, base de dados e RabbitMQ~\cite{rabbitmq} na rede
-interna \\
-RNF04 & Cumprido & Comunicação assíncrona; demonstrado com o serviço de notificações parado
-(Tabela~\ref{tab:falhas}) \\
-RNF05 & Cumprido & Os microsserviços devem ser executados em containers Docker~\cite{docker} e não guardar estado em memória: os dados ficam na respetiva base de dados PostgreSQL~\cite{postgresql} e as mensagens no RabbitMQ~\cite{rabbitmq}.\\
-RNF06 & Cumprido & Um serviço e uma base de dados por área de negócio, \textit{migrations}
-versionadas e OpenAPI~\cite{openapi} de cada serviço \\
-RNF07 & Protótipo & Abordagem \textit{mobile first} definida no protótipo de alta fidelidade; a
-aplicação cliente não fez parte da implementação \\
-RNF08 & Cumprido & 114 testes unitários e de integração e duas \textit{collections} do Postman~\cite{postman}
-(Capítulo~\ref{cap:testes}) \\
-RNF09 & Cumprido & Consentimento no registo e eliminação de conta com anonimização em todos os
-serviços \\
-\caption{Rastreabilidade dos requisitos}
-\end{longtable}
+\end{tabularx}
+\caption{Containers do ambiente}
+\label{tab:containeres}
+\end{table}
 
-\section{Conclusão}
-
-O GrabATable foi implementado como um conjunto de cinco microsserviços independentes atrás de um
-API Gateway, cada um com a sua base de dados, comunicando por eventos através do RabbitMQ~\cite{rabbitmq}. A
-principal inovação identificada na análise, a gestão conjunta das reservas e da fila de espera, foi
-concretizada sem transações distribuídas: cada decisão crítica (não exceder as mesas, contar uma
-falta uma só vez, não chamar o mesmo grupo duas vezes) é tomada dentro de uma única base de dados,
-e a informação de que a fila de espera precisa chega-lhe por eventos.
-
-A arquitetura foi validada não só no caminho feliz, mas também perante falhas: com qualquer
-serviço, a base de dados ou o \textit{broker} em baixo, o sistema responde de forma previsível e
-explica à aplicação o que falhou, e o rastreio distribuído permite seguir cada pedido através de
-todos os serviços. O comportamento está coberto por 114 testes automáticos e por testes de sistema
-que percorrem os fluxos completos e os cenários de falha.
-
-\section{Trabalho Futuro}
-
-\begin{itemize}
-  \item \textbf{\textit{Transactional outbox}:} garantir que nenhum evento se perde quando o RabbitMQ~\cite{rabbitmq}
-        está em baixo;
-  \item \textbf{Aplicação cliente:} implementar a aplicação a partir do protótipo, com notificações
-        em tempo real (por exemplo com SignalR) para a posição na fila;
-  \item \textbf{Estatísticas da fila:} tempos de espera reais face aos estimados, para completar o
-        RF12 e afinar a estimativa;
-  \item \textbf{Desempenho:} testes de carga para verificar o RNF01 e calibrar o
-        \textit{HorizontalPodAutoscaler};
-  \item \textbf{Segurança em produção:} HTTPS no ponto de entrada e gestão de segredos num cofre;
-  \item \textbf{Publicação numa \textit{cloud}:} publicar o projeta na cloud.
-\end{itemize}
+Os serviços só arrancam depois de o PostgreSQL~\cite{postgresql} e o RabbitMQ~\cite{rabbitmq} estarem prontos, e cada serviço aplica as suas \textit{migrations} ao arrancar. As credenciais e a
+chave do JWT~\cite{rfc7519} vêm de um ficheiro \texttt{.env} que nunca é guardado no repositório; o repositório
+inclui apenas um \texttt{.env.example}.

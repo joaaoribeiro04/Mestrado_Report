@@ -1,227 +1,340 @@
-\chapter{Implementação da Arquitetura}
-\label{cap:implementacao}
+% =====================================================================
+% Análise heurística, problemas de usabilidade e correções
+% Colocar no chap3.tex, antes de \section{Vídeo de Demonstração}:
+%     \input{heuristica}
+% Pacotes necessários (já tens): booktabs, longtable, array, float, graphicx
+% =====================================================================
+\chapter{Análise Heurística}
+% --- Quadro de um problema de usabilidade (6 campos) ---
+\newcommand{\problema}[6]{%
+  {\small
+  \begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{3.3cm}
+                    >{\raggedright\arraybackslash}p{\dimexpr\textwidth-3.3cm-4\tabcolsep\relax}}
+    \toprule
+    Ecrã ou percurso & #1 \\
+    \midrule
+    Descrição & #2 \\
+    \midrule
+    Heurística & #3 \\
+    \midrule
+    Consequências & #4 \\
+    \midrule
+    Gravidade & #5 \\
+    \midrule
+    Proposta de correção & #6 \\
+    \bottomrule
+  \end{longtable}}
+}
 
-Este capítulo descreve a solução implementada a partir da análise do Capítulo~2: as
-tecnologias escolhidas, o API Gateway, cada um dos cinco microsserviços, a forma como
-comunicam entre si, as regras de negócio e a segurança.
+% --- Figura de comparação (se a imagem não existir, mostra uma caixa) ---
+% Uso: \figcomparacao{ficheiro.png}{legenda}{label}
+\newcommand{\figcomparacao}[3]{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{images/#1}%
+      {\includegraphics[width=\textwidth]{images/#1}}%
+      {\fbox{\parbox{0.9\textwidth}{\centering\vspace{2cm}\textbf{Inserir imagem: images/#1}\vspace{2cm}}}}
+    \caption{#2}
+    \label{#3}
+  \end{figure}
+}
 
-\section{Visão Geral e Tecnologias}
+% =====================================================================
+\section{Análise Heurística Simplificada}
+\label{sec:heuristica}
 
-A plataforma é composta por um API Gateway e cinco microsserviços, um por área de negócio~\cite{newman},
-cada um com a sua própria base de dados (RNF06). Os serviços comunicam sobretudo por
-eventos assíncronos através de um \textit{broker}~\cite{rabbitmq,masstransit} de mensagens; a única chamada síncrona entre
-serviços é a do serviço de reservas ao serviço de restaurantes, para obter os dados do
-restaurante no momento da reserva.
+A versão anterior do protótipo foi avaliada percorrendo as tarefas principais dos três perfis,
+com especial atenção ao percurso do Cliente (``Garantir mesa para jantar''), e comparando cada
+ecrã com as heurísticas de usabilidade abordadas nas aulas. São apresentadas apenas as heurísticas relevantes para o protótipo, com os aspetos positivos e os problemas
+encontrados.
 
-\begin{verbatim}
-App (Cliente, Gestor, Administrador)
-  -> API Gateway (YARP, porta 8080: valida o JWT, limita pedidos, encaminha)
-       -> Auth           -> PostgreSQL: grabatable_auth
-       -> Restaurants    -> PostgreSQL: grabatable_restaurants
-       -> Reservations   -> PostgreSQL: grabatable_reservations (HTTP -> Restaurants)
-       -> Waitlist       -> PostgreSQL: grabatable_waitlist
-       -> Notifications  -> PostgreSQL: grabatable_notifications -> email (SMTP)
-  Serviços <-> RabbitMQ (MassTransit): eventos entre serviços
-  Gateway e serviços -> Jaeger (OpenTelemetry): rastreio de cada pedido
-\end{verbatim}
+{\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{3cm}
+                  >{\raggedright\arraybackslash}p{5.6cm}
+                  >{\raggedright\arraybackslash}p{5.6cm}}
+  \caption{Análise heurística da versão anterior do protótipo}\label{tab:heuristicas}\\
+  \toprule
+  \textbf{Heurística} & \textbf{Aspetos positivos} & \textbf{Problemas} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Heurística} & \textbf{Aspetos positivos} & \textbf{Problemas} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
 
-\section{API Gateway}
+  Visibilidade do estado do sistema
+  & O estado das reservas e da fila era sempre visível, através de etiquetas com texto e ícone
+    (``Confirmada'', ``Cancelada'', ``Não compareceu''), e o ecrã ``A confirmar\ldots''
+    informava que o pedido estava em curso.
+  & Os filtros do ecrã de início e os seletores de hora e de número de pessoas não reagiam ao
+    toque, pelo que o utilizador não sabia se a escolha tinha ficado registada (problema~2).
+    Em vários ecrãs, o conteúdo ficava cortado no fundo, sem indicação de que havia mais
+    informação (problema~1). \\
+  \addlinespace
 
-O gateway é o único componente exposto ao exterior (RNF03). As suas responsabilidades são:
+  Correspondência entre o sistema e o mundo real
+  & A linguagem usa termos do dia a dia da restauração (``Reservar mesa'', ``Entrar na fila de
+    espera'', ``Mesa quase pronta''). As datas, horas e números de pessoas são apresentados
+    como o utilizador os diz.
+  & \emph{Problema menor:} os cartões de restaurante mostravam um ícone genérico em vez de uma
+    fotografia, o que dificultava reconhecer o restaurante. \\
+  \addlinespace
+
+  Controlo e liberdade do utilizador
+  & As ações destrutivas (cancelar uma reserva, sair da fila) já tinham um diálogo com a opção
+    de manter.
+  & A barra inferior não ficava fixa e o botão voltar tinha pouco contraste (problema~3).
+    Faltavam também alguns ecrãs, como a confirmação de envio da ligação de recuperação da
+    palavra-passe e a eliminação da conta, o que deixava percursos sem saída. \\
+  \addlinespace
+
+  Consistência e utilização de convenções
+  & A aplicação segue convenções habituais em aplicações móveis: barra de navegação inferior,
+    botão voltar no canto superior esquerdo, um botão principal por ecrã.
+  & Os elementos não estavam construídos como componentes reutilizáveis, o que originava
+    pequenas diferenças de alinhamento e de centragem de ícones e texto entre ecrãs. \\
+  \addlinespace
+
+  Prevenção de erros
+  & As horas esgotadas apareciam assinaladas antes de o utilizador as escolher.
+  & Muitos elementos interativos tinham áreas de toque abaixo do mínimo recomendado, o que
+    favorecia toques falhados ou no elemento errado (problema~4). \\
+  \addlinespace
+
+  Reconhecimento em vez de memorização
+  & Os separadores da barra inferior combinam ícone e texto.
+  & Os campos de texto tinham a mesma cor dos cartões informativos, pelo que não se
+    reconheciam de imediato como zonas de escrita (problema~5). \\
+  \addlinespace
+
+  Flexibilidade e eficiência de utilização
+  & O percurso principal é curto (três toques desde o ecrã de início até à reserva).
+  & Os atalhos de pesquisa (filtros) não funcionavam, o que obrigava a percorrer toda a lista. \\
+  \addlinespace
+
+  Design estético e minimalista
+  & Os ecrãs mostram apenas a informação necessária.
+  & \emph{Problema estético:} o espaçamento vertical entre grupos de conteúdo era reduzido, o
+    que tornava alguns ecrãs densos. \\
+  \addlinespace
+
+  Reconhecimento e recuperação de erros
+  & Os erros de formulário (por exemplo, palavra-passe incorreta) eram apresentados junto ao
+    campo, com ícone e uma mensagem que indicava como corrigir.
+  & Depois de pedir a recuperação da palavra-passe, o utilizador não recebia confirmação. \\
+  \addlinespace
+
+  Ajuda e informação de apoio
+  & A aplicação é simples e quase não precisa de ajuda; os campos mais exigentes têm texto de
+    apoio (``Mínimo de 8 caracteres'').
+  & \emph{Problema estético:} a ligação ``Política de privacidade'' no registo não levava a
+    nenhum ecrã. \\
+\end{longtable}}
+
+
+% =====================================================================
+\section{Problemas de Usabilidade}
+\label{sec:problemas}
+
+Cada problema é descrito com o ecrã ou percurso afetado, a heurística violada, as consequências
+para o utilizador, a gravidade (escala de 0 a 4 de Nielsen~\cite{nielsen}) e a correção proposta.
+
+\subsection{Problema 1: conteúdo cortado nos ecrãs longos}
+
+\problema
+  {Painel do serviço (Gestor) e, em geral, todos os ecrãs com muito conteúdo, como o Início e
+   As minhas reservas.}
+  {Os ecrãs não tinham \textit{scroll}, por isso todo o conteúdo tinha de caber na altura do
+   telemóvel. Para isso, os elementos ficavam comprimidos: no Painel do serviço só cabiam três
+   indicadores, apertados, e o texto do botão ``Não compareceu'' quase tocava na borda. As listas
+   também não podiam crescer além do que cabia no ecrã.}
+  {Visibilidade do estado do sistema.}
+  {Informação importante ficava de fora ou difícil de ler, e as listas não podiam mostrar mais
+   restaurantes ou reservas sem cortar conteúdo.}
+  {3 \textperiodcentered{} Problema grave.}
+  {Ativar o \textit{scroll} vertical em todos os ecrãs cujo conteúdo excede a altura do ecrã,
+   mantendo fixos os elementos de navegação.}
+
+\subsection{Problema 2: filtros e seletores sem resposta}
+
+\problema
+  {Início (filtros) e Reservar mesa (seleção de dia, hora e número de pessoas), no percurso
+   principal do Cliente.}
+  {Os filtros do ecrã de início (``Hoje, 20:00'', ``2 pessoas'', ``Cozinha'') e os seletores do
+   ecrã de reserva não reagiam ao toque. A opção selecionada não mudava e a lista de restaurantes
+   mantinha-se igual.}
+  {Visibilidade do estado do sistema; Flexibilidade e eficiência de utilização.}
+  {O utilizador não sabia se a escolha tinha sido registada, podia julgar que a aplicação estava
+   avariada e não conseguia reduzir a lista ao tipo de cozinha pretendido.}
+  {3 \textperiodcentered{} Problema grave.}
+  {Tornar os seletores interativos, com estados visíveis (predefinido, selecionado, esgotado), e
+   substituir os filtros por filtros de cozinha que alteram a lista apresentada.}
+
+\subsection{Problema 3: navegação pouco persistente e botão voltar pouco visível}
+
+\problema
+  {Todos os ecrãs com barra inferior (Início, As minhas reservas, A sua fila) e todos os ecrãs
+   com cabeçalho (por exemplo, Reservar mesa).}
+  {A barra de navegação inferior não ficava fixa no fundo do ecrã. O botão voltar era um círculo
+   bege sobre fundo creme, com pouco contraste.}
+  {Controlo e liberdade do utilizador.}
+  {O utilizador podia perder o acesso à navegação principal e não identificar de imediato como
+   regressar ao ecrã anterior, sentindo-se ``preso''.}
+  {3 \textperiodcentered{} Problema grave.}
+  {Fixar a barra inferior e a barra de estado em todos os ecrãs e redesenhar o botão voltar com
+   maior contraste.}
+
+\subsection{Problema 4: áreas de toque pequenas}
+
+\problema
+  {Vários ecrãs, sobretudo Reservar mesa (opções de hora), Início (filtros) e os cabeçalhos
+   (botão voltar).}
+  {As ligações eram zonas desenhadas à parte, por cima de imagens importadas, e várias eram mais
+   pequenas do que o botão visível, abaixo dos 44 $\times$ 44 px recomendados para ecrãs
+   táteis.}
+  {Prevenção de erros.}
+  {Toques falhados ou no elemento ao lado, por exemplo escolher a hora errada, o que obriga o
+   utilizador a repetir ações. É especialmente penalizador para quem usa o telemóvel a caminho do
+   restaurante, numa só mão.}
+  {3 \textperiodcentered{} Problema grave.}
+  {Definir uma área de toque mínima de 44 $\times$ 44 px para todos os elementos interativos e
+   aumentar o espaçamento entre eles.}
+
+\subsection{Problema 5: campos de texto pouco reconhecíveis}
+
+\problema
+  {Iniciar sessão, Criar conta e Pesquisa, no início do percurso principal.}
+  {Os campos de texto tinham a mesma cor de fundo (bege) dos cartões informativos e só se
+   distinguiam deles pela borda.}
+  {Reconhecimento em vez de memorização; Consistência e utilização de convenções.}
+  {O utilizador demorava mais a perceber onde podia escrever, sobretudo nos formulários com
+   vários campos.}
+  {2 \textperiodcentered{} Problema menor.}
+  {Dar aos campos de texto uma cor própria, mais clara que a dos cartões, mantendo a borda, e
+   aplicá-la de forma igual em todos os campos da aplicação.}
+
+% =====================================================================
+\section{Correções e Melhorias}
+\label{sec:correcoes}
+
+Todas as correções foram feitas nos componentes do \textit{design system} do Figma. Assim, cada
+alteração foi aplicada uma só vez e propagou-se automaticamente a todos os ecrãs que usam esse
+componente.
+
+\subsection{Correção 1: \textit{scroll} nos ecrãs longos}
 
 \begin{itemize}
-  \item \textbf{Encaminhamento:} cada prefixo de rota (\texttt{/api/auth}, \texttt{/api/restaurants},
-        \texttt{/api/reservations}, \texttt{/api/waitlist}, \texttt{/api/notifications}) é
-        encaminhado para o serviço correspondente, na rede interna do Docker~\cite{docker};
-  \item \textbf{Autenticação:} o JWT~\cite{rfc7519} é validado no gateway antes de o pedido chegar ao serviço.
-        As rotas públicas do Auth (registo, login, renovação do token e recuperação de
-        palavra-passe) são as únicas que não exigem token;
-  \item \textbf{Limite de pedidos:} as rotas públicas do Auth aceitam no máximo 10 pedidos por
-        minuto por endereço IP, para dificultar ataques de força bruta ao login;
-  \item \textbf{CORS:} só a origem do \textit{frontend} pode fazer pedidos a partir do browser;
-  \item \textbf{Tratamento de falhas:} quando um serviço está em baixo ou não responde, o gateway
-        devolve uma resposta clara;
+  \item \textbf{Problema resolvido:} problema~1.
+  \item \textbf{Versão anterior:} ecrã ``Painel do serviço'' (Gestor), com três indicadores
+        apertados e o botão ``Não compareceu'' no limite.
+  \item \textbf{Versão corrigida:} ecrã ``31 \textperiodcentered{} Painel do serviço'', com
+        quatro indicadores e \textit{scroll} vertical.
+  \item \textbf{Justificação:} todos os ecrãs cujo conteúdo excede a altura do telemóvel
+        passaram a ter \textit{scroll} vertical. A barra de estado e a barra inferior ficam
+        fixas, para que o utilizador veja todo o conteúdo sem perder a navegação. O espaço
+        inferior do conteúdo foi aumentado, para que o último elemento nunca fique escondido
+        atrás da barra. Deixando de estar limitado à altura do ecrã, o painel passou a mostrar
+        quatro indicadores, com espaço entre eles.
 \end{itemize}
 
-O JWT~\cite{rfc7519} é validado no gateway e outra vez em cada serviço, com a mesma chave. Assim, um serviço
-nunca confia apenas na rede: mesmo que um pedido chegasse sem passar pelo gateway, seria
-recusado sem um token válido.
+\figcomparacao{comparacao1.png}{Comparação 1: Painel do serviço antes e depois da correção}{fig:comp1}
 
-\section{Microsserviços}
-
-\subsection{Serviço de Autenticação (Auth)}
-
-\textbf{Responsabilidade:} contas de utilizador, autenticação, perfis e política de faltas.
+\subsection{Correção 2: filtros e seletores interativos}
 
 \begin{itemize}
-  \item \textbf{Registo e login:} só os clientes se registam; as contas de gestor são criadas pelo
-        administrador e associadas a um restaurante. O login devolve um \textit{access token}
-        de 15 minutos e um \textit{refresh token} de 7 dias;
-  \item \textbf{Tokens:} o \textit{refresh token} é aleatório (64 bytes) e só o seu \textit{hash}
-        SHA-256 é guardado. Cada renovação revoga o token anterior (rotação);
-  \item \textbf{Recuperação de palavra-passe:} a resposta é igual exista ou não o email, para não
-        revelar que contas existem; a ligação de recuperação é enviada pelo serviço de
-        notificações;
-  \item \textbf{Perfil:} consultar e alterar nome, email, telefone, palavra-passe e fotografia;
-  \item \textbf{Eliminação da conta (RGPD):} os dados pessoais são anonimizados e é publicado o
-        evento \texttt{UserDeleted}, para que os outros serviços anonimizem também os seus;
-  \item \textbf{Administração:} listar utilizadores, criar gestores, bloquear e desbloquear
-        clientes, e definir o limite de faltas (por defeito 3);
-  \item \textbf{Contagem de faltas:} consome \texttt{NoShowRegistered} (regra~4,
-        Secção~\ref{sec:regras}).
+  \item \textbf{Problema resolvido:} problema~2.
+  \item \textbf{Versão anterior:} ecrãs ``Início'' e ``Reservar mesa'', com filtros e seletores
+        estáticos.
+  \item \textbf{Versão corrigida:} ecrãs ``06 \textperiodcentered{} Início'' e
+        ``06c \textperiodcentered{} Início (Japonesa)'', com a lista filtrada, e
+        ``09 \textperiodcentered{} Reservar mesa'', com os seletores interativos.
+  \item \textbf{Justificação:}
+    \begin{itemize}
+      \item \textbf{Filtros:} passaram a ser por tipo de cozinha (Todas, Portuguesa, Japonesa,
+            Petiscos); ao tocar num filtro, a lista mostra só os restaurantes dessa cozinha e o
+            filtro fica assinalado;
+      \item \textbf{Seletores de dia, hora e número de pessoas:} mudam de estado ao toque, com
+            indicação clara da opção selecionada;
+      \item \textbf{Hora esgotada:} aparece tracejada e com a palavra ``esgotado''; ao tocar
+            nela, o utilizador vê uma explicação com horas alternativas.
+    \end{itemize}
 \end{itemize}
 
-\textbf{Dados:} \texttt{users}, \texttt{refresh\_tokens}, \texttt{password\_reset\_tokens},
-\texttt{counted\_no\_shows} e \texttt{policies}. \textbf{Endpoints:} 17.
+\figcomparacao{comparacao2.png}{Comparação 2: filtros e seletores antes e depois da correção}{fig:comp2}
 
-\subsection{Serviço de Restaurantes (Restaurants)}
-
-\textbf{Responsabilidade:} restaurantes, mesas, turnos, estado das mesas, tempo médio de
-refeição e estatísticas de ocupação.
+\subsection{Correção 3: navegação fixa e botão voltar mais visível}
 
 \begin{itemize}
-  \item \textbf{Restaurantes:} pesquisa por texto, data e número de pessoas; detalhes com
-        horários, turnos e capacidades das mesas; criação, edição e desativação pelo administrador;
-  \item \textbf{Mesas:} criar, editar e remover mesas e capacidades (o gestor só no seu restaurante);
-  \item \textbf{Ocupação:} cada refeição fica registada em \texttt{table\_sessions} (hora em que o
-        grupo se sentou e em que a mesa foi libertada). Libertar uma mesa publica
-        \texttt{TableFreed};
-  \item \textbf{Tempo médio de refeição:} começa no valor por defeito (90 minutos) e passa a ser a
-        média real (regra~5), ou um valor fixo definido pelo gestor (modo manual);
-  \item \textbf{Estatísticas:} ocupação por dia e tempo médio real nos últimos $N$ dias;
-  \item \textbf{Cópia para a fila de espera:} sempre que o restaurante, as mesas ou o estado de uma
-        mesa mudam, publica \texttt{RestaurantSnapshotChanged}.
+  \item \textbf{Problema resolvido:} problema~3.
+  \item \textbf{Versão anterior:} cabeçalho de ``Reservar mesa'', com o botão voltar bege, e
+        ``Início'', com a barra inferior não fixa.
+  \item \textbf{Versão corrigida:} os mesmos ecrãs, com o botão voltar verde e a barra inferior
+        fixa.
+  \item \textbf{Justificação:}
+    \begin{itemize}
+      \item \textbf{Barra inferior:} fica sempre visível, com o separador ativo assinalado por um
+            indicador e texto em negrito;
+      \item \textbf{Botão voltar:} passou a ser um círculo verde com seta creme, com um contraste
+            de 5,8:1, no mesmo sítio em todos os ecrãs;
+      \item \textbf{Ecrãs em falta:} acrescentaram-se os ecrãs que faltavam (confirmação do envio
+            da ligação de recuperação, política de privacidade, alteração da fotografia e
+            eliminação da conta), para que nenhum percurso fique sem saída.
+    \end{itemize}
 \end{itemize}
 
-\textbf{Dados:} \texttt{restaurants} (horários e turnos em \texttt{jsonb}), \texttt{tables},
-\texttt{table\_sessions} e \texttt{policies}. \textbf{Endpoints:} 16.
+\figcomparacao{comparacao3.png}{Comparação 3: navegação e botão voltar antes e depois da correção}{fig:comp3}
 
-\subsection{Serviço de Reservas (Reservations)}
-
-\textbf{Responsabilidade:} reservas, disponibilidade, chegada, não comparência e relatórios.
+\subsection{Correção 4: áreas de toque com o mínimo recomendado}
 
 \begin{itemize}
-  \item \textbf{Disponibilidade:} para um dia e número de pessoas, devolve todas as horas dos
-        turnos, indicando as que estão esgotadas;
-  \item \textbf{Reservar:} valida o restaurante, o turno e o tamanho do grupo. Uma reserva repetida do mesmo cliente à mesma hora dá conflito; uma reserva cancelada não bloqueia uma nova reserva à mesma hora;
-  \item \textbf{Alterar e cancelar:} o cliente só vê e altera as suas reservas (as de outros
-        clientes respondem como inexistentes); o gestor pode cancelar as do seu restaurante;
-  \item \textbf{Reservas manuais:} o gestor regista clientes sem conta (nome e telefone);
-  \item \textbf{Chegada:} sugere a mesa livre mais pequena que serve o grupo e publica
-        \texttt{ReservationArrived}; a refeição fecha-se com \textit{complete};
-  \item \textbf{Não comparência:} publica \texttt{NoShowRegistered};
-  \item \textbf{Relatórios:} número de reservas e taxa de faltas por restaurante ou por região.
+  \item \textbf{Problema resolvido:} problema~4.
+  \item \textbf{Versão anterior:} ecrã ``Reservar mesa'', com as ligações em zonas desenhadas à
+        parte, mais pequenas do que os botões.
+  \item \textbf{Versão corrigida:} componentes com as novas dimensões, por exemplo no ecrã
+        ``09 \textperiodcentered{} Reservar mesa''.
+  \item \textbf{Justificação:} todos os elementos interativos passaram a ter pelo menos
+        44 $\times$ 44 px:
+    \begin{itemize}
+      \item botões: 52 px de altura;
+      \item opções de hora e filtros: 44 px;
+      \item botão voltar, avatar e sino: 48 $\times$ 48 px;
+      \item itens da barra inferior: 97,5 $\times$ 72 px.
+    \end{itemize}
+    O espaço entre grupos de conteúdo passou para 24 px, o que também reduz toques no elemento
+    errado. As dimensões foram verificadas em todos os elementos com ligação no protótipo.
 \end{itemize}
 
-Os dados do restaurante (turnos, capacidades, tempo médio de refeição) são pedidos ao serviço
-de restaurantes por HTTP, reencaminhando o cabeçalho \texttt{Authorization} do pedido original.
+\figcomparacao{comparacao4.png}{Comparação 4: áreas de toque antes e depois da correção}{fig:comp4}
 
-\textbf{Dados:} \texttt{reservations}, com o histórico de estados em \texttt{jsonb} e o nome do
-cliente (\texttt{customer\_name}) para o ecrã do gestor. \textbf{Endpoints:} 11.
-
-\subsection{Serviço de Fila de Espera (Waitlist)}
-
-\textbf{Responsabilidade:} fila de espera, tempo estimado e atribuição de mesas livres.
+\subsection{Correção 5: campos de texto com cor própria}
 
 \begin{itemize}
-  \item \textbf{Fila:} o cliente entra na fila, consulta a posição, o total de grupos e o tempo
-        estimado, e pode sair; o gestor consulta a fila do seu restaurante;
-  \item \textbf{Estimativa:} Cada grupo à frente ocupa a mesa adequada que fica livre mais cedo durante o tempo médio de refeição; o tempo do novo grupo é o da primeira mesa adequada a ficar livre (função EstimateMinutes).
-  \item \textbf{Tolerância:} um processo em segundo plano verifica a cada 30 segundos os grupos
-        chamados que não se apresentaram dentro da tolerância (15 minutos por defeito), passa-os
-        a \textit{Expired} e volta a oferecer a mesa;
-  \item \textbf{Gestão manual:} o gestor pode chamar o próximo grupo e marcá-lo como sentado.
+  \item \textbf{Problema resolvido:} problema~5.
+  \item \textbf{Versão anterior:} ecrã ``Iniciar sessão'', com os campos em bege, iguais aos
+        cartões.
+  \item \textbf{Versão corrigida:} ecrã ``02 \textperiodcentered{} Iniciar sessão'', com os
+        campos em bege claro (\autoref{fig:comp5}).
+  \item \textbf{Justificação:} acrescentou-se à paleta uma nova cor, o bege claro
+        (\texttt{\#F3EAD7}), usada em todos os campos de texto e na pesquisa, mantendo a borda
+        em areia. Os campos distinguem-se assim dos cartões informativos. O texto escrito mantém
+        um contraste de 9,8:1, acima do nível AA da WCAG~\cite{wcag}.
 \end{itemize}
 
-\textbf{Dados:} \texttt{waitlist\_entries}, \texttt{restaurant\_snapshots} e
-\texttt{upcoming\_reservations}. \textbf{Endpoints:} 7.
+\figcomparacao{comparacao5.png}{Comparação 5: campos de texto antes e depois da correção}{fig:comp5}
 
-\subsection{Serviço de Notificações (Notifications)}
+\subsection{Outras melhorias}
 
-\textbf{Responsabilidade:} envio de emails, registo e lista das notificações de cada utilizador. É o serviço que integra o serviço externo da plataforma, o Mailtrap.
+Além dos cinco problemas descritos, a análise motivou outras alterações:
 
 \begin{itemize}
-  \item \textbf{Consumidores:} reserva confirmada, alterada e cancelada; grupo chamado da fila; pedido de revisão de bloqueio (enviado ao administrador); cliente bloqueado; recuperação de palavra-passe; eliminação de conta (anonimiza o registo);
-  \item \textbf{Modelos:} sete modelos de mensagem em português, editáveis pelo administrador;
-  \item \textbf{Preferências:} cada utilizador pode desligar os avisos por email;
-  \item \textbf{Envio pela API do Mailtrap::} os emails são enviados para uma caixa de testes (sandbox) do Mailtrap~\cite{mailtrap} através da sua API HTTP, por HTTPS (porta 443), com um token de acesso e o identificador da caixa definidos em variáveis de ambiente. A caixa recebe todos os emails sem os entregar aos destinatários reais, o que permite verificar o conteúdo de cada mensagem durante o desenvolvimento e a demonstração;
-  \item \textbf{Registo e falhas:} cada notificação fica registada com o estado Sent (aceite pelo Mailtrap~\cite{mailtrap}), Failed (com a mensagem de erro) ou Skipped (utilizador com os emails desligados). Uma falha no envio não bloqueia o consumidor, e cada notificação guarda o identificador da mensagem que lhe deu origem, para que um evento repetido não envie o mesmo email duas vezes.
+  \item \textbf{Fotografias:} os cartões e os detalhes de restaurante passaram a mostrar
+        fotografias;
+  \item \textbf{Ecrã de abertura:} passou a existir em todos os percursos, incluindo os do Gestor
+        e do Administrador;
+  \item \textbf{Organização no Figma:} os componentes ficaram agrupados num \textit{design
+        system}, com nomes claros e variantes de estado, e os ecrãs em secções por percurso;
+  \item \textbf{Fidelidade ao sistema visual:} confirmou-se que as cores, a tipografia, a grelha
+        e as margens do protótipo correspondem ao definido na \autoref{sec:sistema-visual}.
 \end{itemize}
-
-\textbf{Dados:} \texttt{notification\_log}, \texttt{preferences} e \texttt{templates}.
-\textbf{Endpoints:} 4.
-
-\section{Comunicação entre Serviços}
-\label{sec:comunicacao}
-
-Cada serviço publica um evento depois de gravar a alteração na sua base de dados. Os eventos
-levam os dados de que os consumidores precisam (por exemplo o email do cliente), porque um
-serviço nunca acede à base de dados de outro.
-
-\begin{table}[h]
-\centering
-\begin{tabular}{lll}
-\toprule
-\textbf{Evento} & \textbf{Publicado por} & \textbf{Consumido por} \\
-\midrule
-\texttt{ReservationConfirmed} & Reservations & Notifications, Waitlist \\
-\texttt{ReservationChanged} & Reservations & Notifications, Waitlist \\
-\texttt{ReservationCancelled} & Reservations & Notifications, Waitlist \\
-\texttt{ReservationArrived} & Reservations & Restaurants, Waitlist \\
-\texttt{NoShowRegistered} & Reservations & Auth, Waitlist \\
-\texttt{TableFreed} & Restaurants & Waitlist \\
-\texttt{RestaurantSnapshotChanged} & Restaurants & Waitlist \\
-\texttt{WaitlistPromoted} & Waitlist & Notifications, Restaurants \\
-\texttt{BlockReviewRequested} & Auth & Notifications \\
-\texttt{UserBlocked} & Auth & Notifications \\
-\texttt{UserDeleted} & Auth & Reservations, Waitlist, Notifications \\
-\texttt{PasswordResetRequested} & Auth & Notifications \\
-\bottomrule
-\end{tabular}
-\caption{Eventos trocados entre serviços}
-\label{tab:eventos}
-\end{table}
-
-Como a mesma mensagem pode ser entregue mais de uma vez, \textbf{todos os consumidores são
-idempotentes}: processar duas vezes a mesma mensagem tem o mesmo efeito que processá-la uma
-vez (por exemplo, a falta é registada numa tabela cuja chave primária é o identificador da
-reserva, e cada notificação guarda o identificador da mensagem que lhe deu origem). Em caso de
-erro, cada consumidor tenta outra vez até três vezes, com intervalos de 5 segundos. Cada serviço
-tem as suas próprias filas no RabbitMQ~\cite{rabbitmq} (por exemplo \texttt{waitlist-table-freed} e
-\texttt{notifications-reservation-confirmed}), de modo que cada um recebe a sua cópia do evento.
-
-\section{Dados}
-
-Cada serviço tem a sua base de dados no mesmo servidor PostgreSQL~\cite{postgresql} e nunca acede à de outro; entre
-serviços só existem identificadores (\texttt{uuid}), nunca chaves estrangeiras. O esquema de cada
-serviço é versionado com \textit{migrations} do Entity Framework Core~\cite{efcore}, aplicadas automaticamente
-quando o serviço arranca. As regras de integridade estão também na própria base de dados:
-restrições únicas (email do utilizador, nome da mesa por restaurante, reserva do mesmo cliente à
-mesma hora), restrições \texttt{CHECK} (capacidade e número de pessoas positivos) e índices
-parciais (por exemplo, só os grupos à espera). As datas são guardadas em UTC e os horários dos
-restaurantes em hora de Lisboa.
-
-\section{Segurança}
-
-\begin{itemize}
-  \item \textbf{Autenticação:} JWT~\cite{rfc7519} assinado com HS256~\cite{rfc7519}, validado no gateway e em cada serviço, com
-        os perfis Cliente, Gestor e Administrador. O token do gestor indica o seu restaurante;
-  \item \textbf{Autorização:} políticas por perfil e verificação ``gestor do próprio restaurante''
-        (um gestor que tenta alterar mesas ou reservas de outro restaurante recebe 403). Um
-        cliente que pede dados de outro cliente recebe 404, para não revelar que existem;
-  \item \textbf{Palavras-passe e tokens:} palavras-passe com BCrypt~\cite{bcrypt}; \textit{refresh tokens} e
-        tokens de recuperação guardados apenas como \textit{hash};
-  \item \textbf{Respostas genéricas:} o login e a recuperação de palavra-passe não revelam que
-        emails existem; um cliente bloqueado recebe a mesma mensagem que credenciais erradas;
-  \item \textbf{Rede:} só o gateway publica uma porta; os serviços, o PostgreSQL~\cite{postgresql} e o RabbitMQ~\cite{rabbitmq}
-        ficam numa rede interna, com utilizador e palavra-passe;
-  \item \textbf{RGPD (RNF09):} consentimento guardado no registo; eliminar a conta anonimiza nome,
-        email e telefone em todos os serviços e mantém as reservas apenas para estatística.~\cite{rgpd}
-\end{itemize}
-
-\section{Documentação das APIs}
-
-Cada serviço documenta a sua API em OpenAPI~\cite{openapi} (RNF06). Todos os \textit{endpoints} declaram as
-respostas possíveis, incluindo os erros (400, 401, 403, 404, 409, 422 e 503), e o esquema de
-autenticação Bearer. Os documentos são gerados automaticamente em cada compilação para a pasta
-\texttt{docs/openapi}~\cite{openapi} (um ficheiro por serviço), sem ser preciso ter os serviços a correr.

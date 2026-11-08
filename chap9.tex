@@ -1,0 +1,32 @@
+\chapter{Conclusão e Trabalho Futuro}
+\label{cap:conclusao}
+
+\section{Conclusão}
+
+O GrabATable foi implementado como um conjunto de cinco microsserviços independentes atrás de um
+API Gateway, cada um com a sua base de dados, comunicando por eventos através do RabbitMQ~\cite{rabbitmq}. A
+principal inovação identificada na análise, a gestão conjunta das reservas e da fila de espera, foi
+concretizada sem transações distribuídas: cada decisão crítica (não exceder as mesas, contar uma
+falta uma só vez, não chamar o mesmo grupo duas vezes) é tomada dentro de uma única base de dados,
+e a informação de que a fila de espera precisa chega-lhe por eventos.
+
+A arquitetura foi validada não só no caminho feliz, mas também perante falhas: com qualquer
+serviço, a base de dados ou o \textit{broker} em baixo, o sistema responde de forma previsível e
+explica à aplicação o que falhou, e o rastreio distribuído permite seguir cada pedido através de
+todos os serviços. O comportamento está coberto por 114 testes automáticos e por testes de sistema
+que percorrem os fluxos completos e os cenários de falha.
+
+\section{Trabalho Futuro}
+
+\begin{itemize}
+  \item \textbf{\textit{Transactional outbox}:} garantir que nenhum evento se perde quando o RabbitMQ~\cite{rabbitmq}
+        está em baixo;
+  \item \textbf{Aplicação cliente:} implementar a aplicação a partir do protótipo, com notificações
+        em tempo real (por exemplo com SignalR) para a posição na fila;
+  \item \textbf{Estatísticas da fila:} tempos de espera reais face aos estimados, para completar o
+        RF12 e afinar a estimativa;
+  \item \textbf{Desempenho:} testes de carga para verificar o RNF01 e calibrar o
+        \textit{HorizontalPodAutoscaler};
+  \item \textbf{Segurança em produção:} HTTPS no ponto de entrada e gestão de segredos num cofre;
+  \item \textbf{Publicação numa \textit{cloud}:} publicar o projeta na cloud.
+\end{itemize}

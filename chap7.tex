@@ -1,45 +1,110 @@
-\chapter{Containers -- Docker}
-\label{cap:implantacao}
+\chapter{Testes}
+\label{cap:testes}
 
-\section{Imagens}
+A estratégia de testes cobre três níveis (RNF08): testes unitários da lógica de decisão, testes de
+integração de cada serviço com uma base de dados real, e testes de sistema que percorrem os fluxos
+completos através do API Gateway. Todos os testes são automáticos e repetíveis.
 
-Todos os serviços usam o mesmo \textit{Dockerfile}, em duas fases e com imagens oficiais da
-Microsoft: a compilação é feita na imagem do SDK do .NET 10~\cite{dotnet} e o resultado é copiado para a imagem
-\texttt{aspnet:10.0}~\cite{aspnetcore}, mais pequena e sem ferramentas de compilação. O processo corre com um
-utilizador sem privilégios de administrador. O PostgreSQL~\cite{postgresql}, o RabbitMQ~\cite{rabbitmq} e o Jaeger~\cite{jaeger} usam também as
-imagens oficiais.
+\section{Testes de Integração}
 
-\section{Ambiente com Docker Compose}
+Cada serviço tem testes de integração que arrancam a aplicação completa em memória
+(\texttt{WebApplicationFactory}) e enviam pedidos HTTP reais, com:
 
-O ficheiro \texttt{deploy/docker-compose.yml} arranca o ambiente completo com um só comando:
+\begin{itemize}
+  \item \textbf{Base de dados real:} um PostgreSQL 17~\cite{postgresql} novo por classe de testes, criado num
+        container pelo Testcontainers, com as \textit{migrations} reais aplicadas. Os testes usam
+        assim as mesmas restrições, índices e bloqueios que a produção;
+  \item \textbf{Mensagens em memória:} o MassTransit é substituído pelo seu \textit{test harness}, que
+        permite publicar eventos e verificar quais foram publicados e consumidos;
+  \item \textbf{Tokens de teste:} gerados com a mesma biblioteca e chave que o serviço de
+        autenticação, para cada perfil;
+  \item \textbf{Dependências simuladas:} o serviço de restaurantes é substituído nos testes do serviço
+        de reservas, incluindo um modo em que simula estar em baixo.
+\end{itemize}
 
-\begin{verbatim}
-docker compose --env-file .env -f deploy/docker-compose.yml up -d --build
-\end{verbatim}
+\section{Testes Obrigatórios}
+\label{sec:testes-obrigatorios}
+
+A análise definiu um conjunto de testes obrigatórios para as regras críticas. Todos estão
+implementados e passam:
 
 \begin{table}[H]
 \centering
 \small
-\renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.28\textwidth} X}
+\begin{tabularx}{\textwidth}{Xl}
 \toprule
-\textbf{Container} & \textbf{Função} \\
+\textbf{Teste} & \textbf{Serviço} \\
 \midrule
-\texttt{gateway} & API Gateway; único com porta publicada (8080) \\
-\texttt{auth-api}, \texttt{restaurants-api}, \texttt{reservations-api}, \texttt{waitlist-api}, \texttt{notifications-api}
-& Microsserviços, apenas na rede interna \\
-\texttt{postgres}
-& PostgreSQL 17~\cite{postgresql}; um \textit{script} de arranque cria as cinco bases de dados e um utilizador só de leitura para exportação de dados \\
-\texttt{rabbitmq}
-& \textit{Broker} de mensagens \\
-\texttt{jaeger}
-& Rastreio distribuído; interface apenas acessível na própria máquina \\
+10 pedidos de reserva em paralelo para 3 mesas dão exatamente 3 reservas (3 respostas 201 e 7
+respostas 409) & Reservations \\
+\texttt{ShouldProtect}: mesa de 4 livre às 19:40 com reserva de 3 às 20:00 fica protegida & Waitlist \\
+\texttt{ShouldProtect}: com a reserva às 21:30, a mesa vai para a fila & Waitlist \\
+\texttt{ShouldProtect}: com duas mesas livres, uma vai para a fila & Waitlist \\
+Um grupo de 6 não bloqueia um grupo de 2 quando só há mesa de 4 & Waitlist \\
+Duas mensagens \texttt{TableFreed} seguidas não promovem o mesmo grupo & Waitlist \\
+A mesma falta é contada uma só vez & Auth \\
+A média do tempo de refeição só substitui o valor inicial com 20 amostras e ignora refeições fora
+do intervalo de 15 minutos a 4 horas & Restaurants \\
+Um gestor não consegue alterar mesas nem reservas de outro restaurante (403) & Restaurants,
+Reservations \\
 \bottomrule
 \end{tabularx}
-\caption{Containers do ambiente}
-\label{tab:containeres}
+\caption{Testes obrigatórios}
+\label{tab:testes-obrigatorios}
 \end{table}
 
-Os serviços só arrancam depois de o PostgreSQL~\cite{postgresql} e o RabbitMQ~\cite{rabbitmq} estarem prontos, e cada serviço aplica as suas \textit{migrations} ao arrancar. As credenciais e a
-chave do JWT~\cite{rfc7519} vêm de um ficheiro \texttt{.env} que nunca é guardado no repositório; o repositório
-inclui apenas um \texttt{.env.example}.
+Para além destes, os testes de integração cobrem o registo, o login e a rotação de tokens, o
+bloqueio de clientes, a eliminação de conta (RGPD)~\cite{rgpd}, a disponibilidade com horas esgotadas, a
+chegada com sugestão de mesa, a idempotência das notificações, as preferências de email, a
+resposta 503 quando uma dependência está em baixo e as mensagens de erro em português.
+
+\section{Resultados}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+\toprule
+\textbf{Projeto de testes} & \textbf{Testes} \\
+\midrule
+Auth & 26 \\
+Restaurants & 20 \\
+Reservations & 29 \\
+Waitlist & 26 \\
+Notifications & 13 \\
+\midrule
+\textbf{Total} & \textbf{114} \\
+\bottomrule
+\end{tabular}
+\caption{Testes unitários e de integração por serviço (todos aprovados)}
+\label{tab:resultados-testes}
+\end{table}
+
+Os testes executam-se com \texttt{dotnet test} (com o Docker~\cite{docker} a correr, para os containers do
+PostgreSQL)~\cite{postgresql} e terminam em cerca de 30 segundos. Durante o desenvolvimento foi detetado e corrigido
+um problema de estabilidade nos testes: o \textit{test harness} do MassTransit é partilhado por todos
+os testes de uma classe e, depois do primeiro teste, a sua espera por mensagens respondia antes de
+a mensagem nova chegar, o que fazia falhar testes consoante a ordem de execução. As esperas passaram
+a consultar a lista de mensagens até um prazo, e a suíte foi executada várias vezes seguidas sem
+falhas.
+
+\section{Testes de Sistema}
+\label{sec:testes-sistema}
+
+Os testes de sistema usam o ambiente completo (Docker Compose)~\cite{compose} e passam pelo API Gateway, tal como
+a aplicação. Estão em duas \textit{collections} do Postman~\cite{postman}, executáveis também na linha de comandos
+com o Newman:
+
+\begin{itemize}
+  \item \textbf{Fluxo completo} (34 pedidos, 77 verificações): o administrador cria um restaurante,
+        as mesas e o gestor; o cliente regista-se, renova o token, pesquisa, consulta a
+        disponibilidade, reserva (e recebe 409 na reserva repetida) e entra na fila; o gestor
+        marca a chegada (com sugestão de mesa), a falta, liberta a mesa e recebe 403 noutro
+        restaurante; o administrador confirma a falta contada, bloqueia o cliente, e o login
+        seguinte é recusado;
+  \item \textbf{Cenários de falha} (64 verificações): os seis cenários da
+        Tabela~\ref{tab:falhas}, executados pedido a pedido, parando e arrancando os containers
+        indicados.
+\end{itemize}
+
+Ambas incluem verificações comuns a todos os pedidos: a resposta tem o cabeçalho
+\texttt{X-Trace-Id} e os erros vêm no formato \textit{Problem Details}. Todas as verificações passaram.
